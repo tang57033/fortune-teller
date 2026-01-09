@@ -92,6 +92,118 @@
 
       <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
+      <div class="divider"></div>
+
+      <h2>合婚测算</h2>
+      <form (ngSubmit)="calculateMatch()" #matchForm="ngForm">
+        <div class="pair-grid">
+          <div class="pair-column">
+            <h3>男方</h3>
+            <div class="field">
+              <label for="maleName">姓名</label>
+              <input id="maleName" name="maleName" type="text" required [(ngModel)]="maleName" />
+            </div>
+            <div class="field">
+              <label for="maleBirthDate">出生日期</label>
+              <input
+                id="maleBirthDate"
+                name="maleBirthDate"
+                type="date"
+                required
+                [(ngModel)]="maleBirthDate"
+              />
+            </div>
+            <div class="field">
+              <label>出生时间</label>
+              <div class="segmented">
+                <label class="segment">
+                  <input type="radio" name="maleTimeMode" value="time" [(ngModel)]="maleTimeMode" />
+                  具体时间
+                </label>
+                <label class="segment">
+                  <input type="radio" name="maleTimeMode" value="shichen" [(ngModel)]="maleTimeMode" />
+                  时辰
+                </label>
+              </div>
+            </div>
+            <div class="field" *ngIf="maleTimeMode === 'time'">
+              <label for="maleBirthTime">时间 (24小时制)</label>
+              <input
+                id="maleBirthTime"
+                name="maleBirthTime"
+                type="time"
+                required
+                [(ngModel)]="maleBirthTime"
+              />
+            </div>
+            <div class="field" *ngIf="maleTimeMode === 'shichen'">
+              <label for="maleShichen">出生时辰</label>
+              <select id="maleShichen" name="maleShichen" [(ngModel)]="maleShichenIndex">
+                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pair-column">
+            <h3>女方</h3>
+            <div class="field">
+              <label for="femaleName">姓名</label>
+              <input id="femaleName" name="femaleName" type="text" required [(ngModel)]="femaleName" />
+            </div>
+            <div class="field">
+              <label for="femaleBirthDate">出生日期</label>
+              <input
+                id="femaleBirthDate"
+                name="femaleBirthDate"
+                type="date"
+                required
+                [(ngModel)]="femaleBirthDate"
+              />
+            </div>
+            <div class="field">
+              <label>出生时间</label>
+              <div class="segmented">
+                <label class="segment">
+                  <input type="radio" name="femaleTimeMode" value="time" [(ngModel)]="femaleTimeMode" />
+                  具体时间
+                </label>
+                <label class="segment">
+                  <input type="radio" name="femaleTimeMode" value="shichen" [(ngModel)]="femaleTimeMode" />
+                  时辰
+                </label>
+              </div>
+            </div>
+            <div class="field" *ngIf="femaleTimeMode === 'time'">
+              <label for="femaleBirthTime">时间 (24小时制)</label>
+              <input
+                id="femaleBirthTime"
+                name="femaleBirthTime"
+                type="time"
+                required
+                [(ngModel)]="femaleBirthTime"
+              />
+            </div>
+            <div class="field" *ngIf="femaleTimeMode === 'shichen'">
+              <label for="femaleShichen">出生时辰</label>
+              <select id="femaleShichen" name="femaleShichen" [(ngModel)]="femaleShichenIndex">
+                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">合婚测算</button>
+          <button class="ghost" type="button" (click)="resetMatch()">重置</button>
+        </div>
+      </form>
+
+      <p class="error" *ngIf="matchError">{{ matchError }}</p>
+
       <div class="legend">
         <div>
           <span class="legend-line yang"></span>
@@ -108,8 +220,8 @@
       </div>
     </section>
 
-    <section class="panel result-panel" [class.empty]="!result">
-      <ng-container *ngIf="result; else emptyState">
+    <section class="panel result-panel" [class.empty]="!result && !matchResult">
+      <ng-container *ngIf="result">
         <div class="result-header">
           <div>
             <h2>命运解读</h2>
@@ -198,7 +310,25 @@
         </div>
       </ng-container>
 
-      <ng-template #emptyState>
+      <div class="match-result" *ngIf="matchResult">
+        <div class="result-header">
+          <div>
+            <h2>合婚结论</h2>
+            <p>{{ matchResult.maleLabel }} · {{ matchResult.femaleLabel }}</p>
+          </div>
+          <div class="badge">卦象合婚</div>
+        </div>
+        <p class="summary">{{ matchResult.summary }}</p>
+        <div class="match-details">
+          <p *ngFor="let line of matchResult.details">{{ line }}</p>
+        </div>
+        <div class="match-advice">
+          <h3>相处建议</h3>
+          <p *ngFor="let line of matchResult.advice">{{ line }}</p>
+        </div>
+      </div>
+
+      <ng-template [ngIf]="!result && !matchResult">
         <div class="empty-state">
           <h2>等待你的出生信息</h2>
           <p>填写出生年月日与时间，即可生成专属卦象。</p>

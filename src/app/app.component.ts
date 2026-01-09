@@ -55,6 +55,14 @@ interface FortuneResult {
   advice: string;
 }
 
+interface MatchResult {
+  maleLabel: string;
+  femaleLabel: string;
+  summary: string;
+  details: string[];
+  advice: string[];
+}
+
 const TRIGRAMS: Trigram[] = [
   {
     name: '乾',
@@ -491,6 +499,18 @@ export class AppComponent {
   genderOptions = GENDER_OPTIONS;
   result?: FortuneResult;
   errorMessage = '';
+  maleName = '';
+  maleBirthDate = '';
+  maleBirthTime = '12:00';
+  maleTimeMode: TimeMode = 'time';
+  maleShichenIndex = 6;
+  femaleName = '';
+  femaleBirthDate = '';
+  femaleBirthTime = '12:00';
+  femaleTimeMode: TimeMode = 'time';
+  femaleShichenIndex = 6;
+  matchResult?: MatchResult;
+  matchError = '';
 
   calculate(): void {
     this.errorMessage = '';
@@ -511,7 +531,7 @@ export class AppComponent {
       return;
     }
 
-    const hourIndex = this.getHourIndex();
+    const hourIndex = this.getHourIndex(this.timeMode, this.birthTime, this.shichenIndex);
     if (hourIndex === null) {
       this.result = undefined;
       this.errorMessage = '请输入有效的出生时间或选择时辰。';
@@ -528,6 +548,46 @@ export class AppComponent {
     );
   }
 
+  calculateMatch(): void {
+    this.matchError = '';
+    if (!this.maleName.trim() || !this.femaleName.trim()) {
+      this.matchResult = undefined;
+      this.matchError = '请输入男女双方姓名。';
+      return;
+    }
+    const maleDate = this.parseDate(this.maleBirthDate);
+    const femaleDate = this.parseDate(this.femaleBirthDate);
+    if (!maleDate || !femaleDate) {
+      this.matchResult = undefined;
+      this.matchError = '请输入有效的出生日期。';
+      return;
+    }
+    const maleHourIndex = this.getHourIndex(this.maleTimeMode, this.maleBirthTime, this.maleShichenIndex);
+    const femaleHourIndex = this.getHourIndex(
+      this.femaleTimeMode,
+      this.femaleBirthTime,
+      this.femaleShichenIndex
+    );
+    if (maleHourIndex === null || femaleHourIndex === null) {
+      this.matchResult = undefined;
+      this.matchError = '请输入有效的出生时间或选择时辰。';
+      return;
+    }
+
+    this.matchResult = this.buildMatch(
+      this.maleName.trim(),
+      maleDate.year,
+      maleDate.month,
+      maleDate.day,
+      maleHourIndex,
+      this.femaleName.trim(),
+      femaleDate.year,
+      femaleDate.month,
+      femaleDate.day,
+      femaleHourIndex
+    );
+  }
+
   reset(): void {
     this.name = '';
     this.birthDate = '';
@@ -537,6 +597,21 @@ export class AppComponent {
     this.gender = '';
     this.result = undefined;
     this.errorMessage = '';
+  }
+
+  resetMatch(): void {
+    this.maleName = '';
+    this.maleBirthDate = '';
+    this.maleBirthTime = '12:00';
+    this.maleTimeMode = 'time';
+    this.maleShichenIndex = 6;
+    this.femaleName = '';
+    this.femaleBirthDate = '';
+    this.femaleBirthTime = '12:00';
+    this.femaleTimeMode = 'time';
+    this.femaleShichenIndex = 6;
+    this.matchResult = undefined;
+    this.matchError = '';
   }
 
   private parseDate(dateStr: string): { year: number; month: number; day: number } | null {
@@ -551,14 +626,14 @@ export class AppComponent {
     return { year, month, day };
   }
 
-  private getHourIndex(): number | null {
-    if (this.timeMode === 'shichen') {
-      return this.shichenIndex;
+  private getHourIndex(timeMode: TimeMode, birthTime: string, shichenIndex: number): number | null {
+    if (timeMode === 'shichen') {
+      return shichenIndex;
     }
-    if (!this.birthTime) {
+    if (!birthTime) {
       return null;
     }
-    const parts = this.birthTime.split(':').map((part) => Number(part));
+    const parts = birthTime.split(':').map((part) => Number(part));
     if (parts.length < 2 || parts.some((part) => Number.isNaN(part))) {
       return null;
     }
@@ -580,37 +655,30 @@ export class AppComponent {
     day: number,
     hourIndex: number
   ): FortuneResult {
-    const upperIndex = (year + month + day) % 8;
-    const lowerIndex = (month + day + hourIndex) % 8;
-    const movingLine = (year + month + day + hourIndex) % 6;
-
-    const upper = TRIGRAMS[upperIndex];
-    const lower = TRIGRAMS[lowerIndex];
-    const baseLinesRaw = [...lower.lines, ...upper.lines];
-    const changedLinesRaw = baseLinesRaw.map((value, index) =>
-      index === movingLine ? 1 - value : value
-    );
-
-    const changedLower = this.matchTrigram(changedLinesRaw.slice(0, 3));
-    const changedUpper = this.matchTrigram(changedLinesRaw.slice(3));
-
-    const baseHexagram = this.getHexagramInfo(upper, lower);
-    const changedHexagram = this.getHexagramInfo(changedUpper, changedLower);
+    const reading = this.getReading(year, month, day, hourIndex);
+    const {
+      upper,
+      lower,
+      changedUpper,
+      changedLower,
+      movingLine,
+      baseLinesRaw,
+      changedLinesRaw,
+      baseHexagram,
+      changedHexagram
+    } = reading;
 
     const nameSeed = this.getNameSeed(name);
     const genderSeed = this.getGenderSeed(gender);
-    const toneIndex = (upperIndex * 3 + lowerIndex * 2 + movingLine + nameSeed + genderSeed) % 5;
+    const toneIndex =
+      (reading.upperIndex * 3 + reading.lowerIndex * 2 + movingLine + nameSeed + genderSeed) % 5;
     const identityNote = this.getIdentityNote(name, gender, toneIndex);
     const summary = `本卦为${baseHexagram.name}，变卦为${changedHexagram.name}。${OVERALL_TONES[toneIndex]}${identityNote}`;
 
     const elementBalance = this.getElementBalance(upper.element, lower.element);
     const advice = LINE_MESSAGES[movingLine];
 
-    const lineRelations = this.getLineRelations(
-      baseHexagram.symbol,
-      this.getTrigramSymbol(upper.name),
-      this.getTrigramSymbol(lower.name)
-    );
+    const lineRelations = this.getLineRelations(baseHexagram.symbol, reading.upperSymbol, reading.lowerSymbol);
     const relationCounts = this.countRelations(lineRelations);
     const movingRelation = lineRelations[movingLine]?.relation ?? '';
     const fateNotes = this.buildFateNotes(
@@ -678,6 +746,111 @@ export class AppComponent {
       fateNotes,
       sections,
       advice
+    };
+  }
+
+  private buildMatch(
+    maleName: string,
+    maleYear: number,
+    maleMonth: number,
+    maleDay: number,
+    maleHourIndex: number,
+    femaleName: string,
+    femaleYear: number,
+    femaleMonth: number,
+    femaleDay: number,
+    femaleHourIndex: number
+  ): MatchResult {
+    const maleReading = this.getReading(maleYear, maleMonth, maleDay, maleHourIndex);
+    const femaleReading = this.getReading(femaleYear, femaleMonth, femaleDay, femaleHourIndex);
+    const maleRelationCounts = this.countRelations(
+      this.getLineRelations(maleReading.baseHexagram.symbol, maleReading.upperSymbol, maleReading.lowerSymbol)
+    );
+    const femaleRelationCounts = this.countRelations(
+      this.getLineRelations(femaleReading.baseHexagram.symbol, femaleReading.upperSymbol, femaleReading.lowerSymbol)
+    );
+
+    const elementRelation = this.getElementRelation(maleReading.baseHexagram.element, femaleReading.baseHexagram.element);
+    const gongMatch = maleReading.baseHexagram.gong === femaleReading.baseHexagram.gong;
+    const lineGap = Math.abs(maleReading.movingLine - femaleReading.movingLine);
+    const rhythmNote =
+      lineGap === 0 ? '动爻同位，步调相近，彼此更易同频。' : lineGap >= 3 ? '动爻相隔较远，节奏差异明显。' : '动爻差距不大，磨合后更顺。';
+
+    const score = elementRelation.score + (gongMatch ? 2 : 0) + (lineGap <= 1 ? 1 : 0);
+    const summary =
+      score >= 6
+        ? '八字相合偏吉，相处易成，幸福指数高。'
+        : score >= 3
+          ? '八字相合中平，需多经营，顺则长久。'
+          : '八字相克偏重，易有摩擦，需谨慎调和。';
+
+    const details = [
+      '合婚以卦象五行推断八字相合度，供参考。',
+      `男方本卦${maleReading.baseHexagram.name}（卦宫${maleReading.baseHexagram.gong}，五行${maleReading.baseHexagram.element}），女方本卦${femaleReading.baseHexagram.name}（卦宫${femaleReading.baseHexagram.gong}，五行${femaleReading.baseHexagram.element}）。`,
+      `五行关系：${elementRelation.label}。${elementRelation.description}`,
+      `男方子孙爻${this.describeCount(maleRelationCounts.child)}，女方子孙爻${this.describeCount(
+        femaleRelationCounts.child
+      )}，子息缘份强弱可由此窥见。`,
+      `男方姻缘星${this.describeMarriageStar(maleRelationCounts, 'male')}，女方姻缘星${this.describeMarriageStar(
+        femaleRelationCounts,
+        'female'
+      )}。`,
+      rhythmNote
+    ];
+
+    const advice = [
+      '同气则顺，相克则需以柔化刚，少以情绪对抗。',
+      gongMatch ? '卦宫同气，适合共同规划长期目标。' : '卦宫不同，宜在生活节奏上多做协调。',
+      '合婚以互补为贵，彼此短板由对方补足方能长久。'
+    ];
+
+    const maleLabel = `${maleName} · ${maleYear}年${maleMonth}月${maleDay}日 · ${this.getTimeLabel(maleHourIndex)}`;
+    const femaleLabel = `${femaleName} · ${femaleYear}年${femaleMonth}月${femaleDay}日 · ${this.getTimeLabel(
+      femaleHourIndex
+    )}`;
+
+    return {
+      maleLabel,
+      femaleLabel,
+      summary,
+      details,
+      advice
+    };
+  }
+
+  private getReading(year: number, month: number, day: number, hourIndex: number) {
+    const upperIndex = (year + month + day) % 8;
+    const lowerIndex = (month + day + hourIndex) % 8;
+    const movingLine = (year + month + day + hourIndex) % 6;
+
+    const upper = TRIGRAMS[upperIndex];
+    const lower = TRIGRAMS[lowerIndex];
+    const upperSymbol = this.getTrigramSymbol(upper.name);
+    const lowerSymbol = this.getTrigramSymbol(lower.name);
+    const baseLinesRaw = [...lower.lines, ...upper.lines];
+    const changedLinesRaw = baseLinesRaw.map((value, index) =>
+      index === movingLine ? 1 - value : value
+    );
+
+    const changedLower = this.matchTrigram(changedLinesRaw.slice(0, 3));
+    const changedUpper = this.matchTrigram(changedLinesRaw.slice(3));
+    const baseHexagram = this.getHexagramInfo(upper, lower);
+    const changedHexagram = this.getHexagramInfo(changedUpper, changedLower);
+
+    return {
+      upperIndex,
+      lowerIndex,
+      movingLine,
+      upper,
+      lower,
+      upperSymbol,
+      lowerSymbol,
+      baseLinesRaw,
+      changedLinesRaw,
+      changedUpper,
+      changedLower,
+      baseHexagram,
+      changedHexagram
     };
   }
 
@@ -1005,5 +1178,39 @@ export class AppComponent {
     const moving =
       movingRelation === '官鬼' ? ' 动爻临官鬼爻，易有一时波折，宜静养。' : '';
     return `${base}${moving}`;
+  }
+
+  private getElementRelation(a: string, b: string): { label: string; score: number; description: string } {
+    if (a === b) {
+      return { label: '同气', score: 2, description: '五行同气，基础相近，默契更易建立。' };
+    }
+    if (ELEMENT_GENERATES[a] === b) {
+      return { label: '相生', score: 3, description: '男方生女方，气机相扶，互助之象。' };
+    }
+    if (ELEMENT_GENERATES[b] === a) {
+      return { label: '相生', score: 2, description: '女方生男方，能互相成就，但需平衡付出。' };
+    }
+    if (ELEMENT_CONTROLS[a] === b) {
+      return { label: '相克', score: 0, description: '男方克女方，易有压制感，需注意沟通。' };
+    }
+    if (ELEMENT_CONTROLS[b] === a) {
+      return { label: '相克', score: 0, description: '女方克男方，易生不服之气，宜相互尊重。' };
+    }
+    return { label: '中平', score: 1, description: '五行关系中平，顺势经营可稳。' };
+  }
+
+  private describeCount(count: number): string {
+    if (count >= 2) {
+      return '旺';
+    }
+    if (count === 1) {
+      return '现';
+    }
+    return '伏';
+  }
+
+  private describeMarriageStar(counts: { wealth: number; official: number }, gender: 'male' | 'female'): string {
+    const relationCount = gender === 'female' ? counts.official : counts.wealth;
+    return this.describeCount(relationCount);
   }
 }

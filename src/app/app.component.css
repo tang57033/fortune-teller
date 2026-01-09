@@ -79,6 +79,12 @@
   font-size: 1.4rem;
 }
 
+.form-panel h3 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: #3a2c21;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -152,6 +158,26 @@ button:hover {
   color: #a43b2f;
   margin-top: 12px;
   font-size: 0.95rem;
+}
+
+.divider {
+  height: 1px;
+  margin: 26px 0;
+  background: linear-gradient(90deg, transparent, rgba(80, 62, 44, 0.3), transparent);
+}
+
+.pair-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 8px;
+}
+
+.pair-column {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(80, 62, 44, 0.12);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .legend {
@@ -350,6 +376,45 @@ button:hover {
 .section-advice {
   margin-top: 6px;
   color: #6a4f34;
+}
+
+.match-result {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(80, 62, 44, 0.15);
+}
+
+.match-details {
+  margin: 10px 0 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.match-details p {
+  margin: 0;
+  color: #5d4a3a;
+  font-size: 0.9rem;
+}
+
+.match-advice {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(250, 246, 239, 0.85);
+  border: 1px solid rgba(80, 62, 44, 0.12);
+  display: grid;
+  gap: 6px;
+}
+
+.match-advice h3 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: #3a2c21;
+}
+
+.match-advice p {
+  margin: 0;
+  color: #5d4a3a;
+  font-size: 0.9rem;
 }
 
 .empty-state {
