@@ -15,6 +15,21 @@
       <h2>输入信息</h2>
       <form (ngSubmit)="calculate()" #fortuneForm="ngForm">
         <div class="field">
+          <label for="name">姓名</label>
+          <input id="name" name="name" type="text" required [(ngModel)]="name" />
+        </div>
+
+        <div class="field">
+          <label for="gender">性别</label>
+          <select id="gender" name="gender" required [(ngModel)]="gender">
+            <option value="" disabled>请选择</option>
+            <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
           <label for="birthDate">出生日期</label>
           <input
             id="birthDate"
@@ -98,7 +113,7 @@
         <div class="result-header">
           <div>
             <h2>命运解读</h2>
-            <p>{{ result.birthLabel }} · {{ result.timeLabel }}</p>
+            <p>{{ result.name }} · {{ result.genderLabel }} · {{ result.birthLabel }} · {{ result.timeLabel }}</p>
           </div>
           <div class="badge">易经演算</div>
         </div>
@@ -106,6 +121,9 @@
         <div class="hexagram-block">
           <div class="hexagram">
             <h3>本卦</h3>
+            <p class="hexagram-name">
+              {{ result.baseHexagram.symbol }} {{ result.baseHexagram.name }}
+            </p>
             <div class="lines">
               <div
                 class="line"
@@ -133,6 +151,9 @@
 
           <div class="hexagram">
             <h3>变卦</h3>
+            <p class="hexagram-name">
+              {{ result.changedHexagram.symbol }} {{ result.changedHexagram.name }}
+            </p>
             <div class="lines">
               <div
                 class="line"
@@ -162,12 +183,17 @@
           <p class="summary">{{ result.summary }}</p>
           <p class="balance">{{ result.elementBalance }}</p>
           <p class="advice">{{ result.advice }}</p>
+          <div class="fate-notes">
+            <h3>命理断语</h3>
+            <p *ngFor="let line of result.fateNotes">{{ line }}</p>
+          </div>
         </div>
 
         <div class="sections">
           <div class="section" *ngFor="let section of result.sections">
             <h4>{{ section.title }}</h4>
-            <p>{{ section.text }}</p>
+            <p class="section-description">{{ section.description }}</p>
+            <p class="section-advice">{{ section.advice }}</p>
           </div>
         </div>
       </ng-container>

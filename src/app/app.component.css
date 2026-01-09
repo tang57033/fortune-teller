@@ -226,6 +226,12 @@ button:hover {
   font-size: 1.05rem;
 }
 
+.hexagram-name {
+  margin: -6px 0 12px;
+  font-size: 0.95rem;
+  color: #6a4f34;
+}
+
 .lines {
   display: grid;
   gap: 8px;
@@ -295,6 +301,28 @@ button:hover {
   color: #5d4a3a;
 }
 
+.fate-notes {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(250, 246, 239, 0.85);
+  border: 1px solid rgba(80, 62, 44, 0.12);
+  display: grid;
+  gap: 6px;
+}
+
+.fate-notes h3 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: #3a2c21;
+}
+
+.fate-notes p {
+  margin: 0;
+  color: #5d4a3a;
+  font-size: 0.9rem;
+}
+
 .sections {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -317,6 +345,11 @@ button:hover {
   margin: 0;
   color: #5d4a3a;
   font-size: 0.9rem;
+}
+
+.section-advice {
+  margin-top: 6px;
+  color: #6a4f34;
 }
 
 .empty-state {
