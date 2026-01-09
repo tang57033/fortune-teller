@@ -1,0 +1,188 @@
+<div class="app">
+  <header class="hero">
+    <div class="brand">
+      <img class="brand-mark" src="assets/logo.png" alt="Fortune Teller logo" />
+      <div>
+        <h1>命理卦象</h1>
+        <p>以出生年月日与时辰推演，感知你的节奏与方向。</p>
+      </div>
+    </div>
+    <div class="hero-note">以易经八卦演算为灵感，给出趋势与建议。</div>
+  </header>
+
+  <div class="layout">
+    <section class="panel form-panel">
+      <h2>输入信息</h2>
+      <form (ngSubmit)="calculate()" #fortuneForm="ngForm">
+        <div class="field">
+          <label for="birthDate">出生日期</label>
+          <input
+            id="birthDate"
+            name="birthDate"
+            type="date"
+            required
+            [(ngModel)]="birthDate"
+          />
+        </div>
+
+        <div class="field">
+          <label>出生时间</label>
+          <div class="segmented">
+            <label class="segment">
+              <input
+                type="radio"
+                name="timeMode"
+                value="time"
+                [(ngModel)]="timeMode"
+              />
+              具体时间
+            </label>
+            <label class="segment">
+              <input
+                type="radio"
+                name="timeMode"
+                value="shichen"
+                [(ngModel)]="timeMode"
+              />
+              时辰
+            </label>
+          </div>
+        </div>
+
+        <div class="field" *ngIf="timeMode === 'time'">
+          <label for="birthTime">时间 (24小时制)</label>
+          <input
+            id="birthTime"
+            name="birthTime"
+            type="time"
+            required
+            [(ngModel)]="birthTime"
+          />
+        </div>
+
+        <div class="field" *ngIf="timeMode === 'shichen'">
+          <label for="shichen">出生时辰</label>
+          <select id="shichen" name="shichen" [(ngModel)]="shichenIndex">
+            <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+              {{ item.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">生成卦象</button>
+          <button class="ghost" type="button" (click)="reset()">重置</button>
+        </div>
+      </form>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="legend">
+        <div>
+          <span class="legend-line yang"></span>
+          <span>阳爻</span>
+        </div>
+        <div>
+          <span class="legend-line yin"></span>
+          <span>阴爻</span>
+        </div>
+        <div>
+          <span class="legend-line moving"></span>
+          <span>动爻</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel result-panel" [class.empty]="!result">
+      <ng-container *ngIf="result; else emptyState">
+        <div class="result-header">
+          <div>
+            <h2>命运解读</h2>
+            <p>{{ result.birthLabel }} · {{ result.timeLabel }}</p>
+          </div>
+          <div class="badge">易经演算</div>
+        </div>
+
+        <div class="hexagram-block">
+          <div class="hexagram">
+            <h3>本卦</h3>
+            <div class="lines">
+              <div
+                class="line"
+                *ngFor="let line of result.baseLines"
+                [class.yang]="line.value === 1"
+                [class.moving]="line.lineIndex === result.movingLine"
+              >
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <div class="trigram-info">
+              <div>
+                <span>上卦</span>
+                <strong>{{ result.upper.name }}</strong>
+                <small>{{ result.upper.nature }} · {{ result.upper.element }} · {{ result.upper.direction }}</small>
+              </div>
+              <div>
+                <span>下卦</span>
+                <strong>{{ result.lower.name }}</strong>
+                <small>{{ result.lower.nature }} · {{ result.lower.element }} · {{ result.lower.direction }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="hexagram">
+            <h3>变卦</h3>
+            <div class="lines">
+              <div
+                class="line"
+                *ngFor="let line of result.changedLines"
+                [class.yang]="line.value === 1"
+              >
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <div class="trigram-info">
+              <div>
+                <span>上卦</span>
+                <strong>{{ result.changedUpper.name }}</strong>
+                <small>{{ result.changedUpper.nature }} · {{ result.changedUpper.element }} · {{ result.changedUpper.direction }}</small>
+              </div>
+              <div>
+                <span>下卦</span>
+                <strong>{{ result.changedLower.name }}</strong>
+                <small>{{ result.changedLower.nature }} · {{ result.changedLower.element }} · {{ result.changedLower.direction }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="insight">
+          <p class="summary">{{ result.summary }}</p>
+          <p class="balance">{{ result.elementBalance }}</p>
+          <p class="advice">{{ result.advice }}</p>
+        </div>
+
+        <div class="sections">
+          <div class="section" *ngFor="let section of result.sections">
+            <h4>{{ section.title }}</h4>
+            <p>{{ section.text }}</p>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <h2>等待你的出生信息</h2>
+          <p>填写出生年月日与时间，即可生成专属卦象。</p>
+          <div class="empty-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </ng-template>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+dist
+node_modulee
+
+/node_modules
+/dist
+/tmp
+/out-tsc
+.idea
