@@ -1,0 +1,91 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@11.6.2
+2 info using node@v24.12.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/doratang/projects/fortune-teller/.npmrc
+5 silly config load:file:/Users/doratang/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm install @mediapipe/hands @mediapipe/face_mesh
+8 verbose argv "install" "@mediapipe/hands" "@mediapipe/face_mesh"
+9 verbose logfile logs-max:10 dir:/Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T04_16_11_126Z-
+10 verbose logfile /Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T04_16_11_126Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2348810240 maxSize:587202560 maxEntrySize:293601280
+13 silly idealTree buildDeps
+14 silly fetch manifest @mediapipe/hands@*
+15 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fhands cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@mediapipe%2fhands 525ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fhands set size:undefined disposed:false
+18 silly fetch manifest @mediapipe/face_mesh@*
+19 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fface_mesh cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/@mediapipe%2fface_mesh 421ms (cache miss)
+21 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fface_mesh set size:undefined disposed:false
+22 silly placeDep ROOT @mediapipe/face_mesh@0.4.1633559619 OK for: fortune-teller@0.0.0 want: *
+23 silly placeDep ROOT @mediapipe/hands@0.4.1675469240 OK for: fortune-teller@0.0.0 want: *
+24 silly fetch manifest zone.js@~0.15.0 || ~0.16.0
+25 silly packumentCache full:https://registry.npmjs.org/zone.js cache-miss
+26 http fetch GET 200 https://registry.npmjs.org/zone.js 101ms (cache miss)
+27 silly packumentCache full:https://registry.npmjs.org/zone.js set size:undefined disposed:false
+28 verbose stack Error: could not resolve
+28 verbose stack     at PlaceDep.failPeerConflict (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/place-dep.js:503:25)
+28 verbose stack     at new PlaceDep (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/place-dep.js:157:21)
+28 verbose stack     at #buildDepStep (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:945:18)
+28 verbose stack     at async Arborist.buildIdealTree (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:182:7)
+28 verbose stack     at async Promise.all (index 1)
+28 verbose stack     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:114:5)
+28 verbose stack     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+28 verbose stack     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:208:9)
+28 verbose stack     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:67:5)
+29 error code ERESOLVE
+30 error ERESOLVE could not resolve
+31 error
+32 error While resolving: @angular/core@21.0.8
+32 error Found: zone.js@0.14.10
+32 error node_modules/zone.js
+32 error   zone.js@"~0.14.3" from the root project
+32 error
+32 error Could not resolve dependency:
+32 error peerOptional zone.js@"~0.15.0 || ~0.16.0" from @angular/core@21.0.8
+32 error node_modules/@angular/core
+32 error   peerOptional @angular/core@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+32 error   node_modules/@angular-devkit/build-angular
+32 error     dev @angular-devkit/build-angular@"^21.0.5" from the root project
+32 error   peerOptional @angular/core@"^21.0.0" from @angular/build@21.0.5
+32 error   node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+32 error     @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+32 error     node_modules/@angular-devkit/build-angular
+32 error       dev @angular-devkit/build-angular@"^21.0.5" from the root project
+32 error   7 more (@angular/animations, @angular/common, @angular/forms, ...)
+32 error
+32 error Conflicting peer dependency: zone.js@0.16.0
+32 error node_modules/zone.js
+32 error   peerOptional zone.js@"~0.15.0 || ~0.16.0" from @angular/core@21.0.8
+32 error   node_modules/@angular/core
+32 error     peerOptional @angular/core@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+32 error     node_modules/@angular-devkit/build-angular
+32 error       dev @angular-devkit/build-angular@"^21.0.5" from the root project
+32 error     peerOptional @angular/core@"^21.0.0" from @angular/build@21.0.5
+32 error     node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+32 error       @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+32 error       node_modules/@angular-devkit/build-angular
+32 error         dev @angular-devkit/build-angular@"^21.0.5" from the root project
+32 error     7 more (@angular/animations, @angular/common, @angular/forms, ...)
+32 error
+32 error Fix the upstream dependency conflict, or retry
+32 error this command with --force or --legacy-peer-deps
+32 error to accept an incorrect (and potentially broken) dependency resolution.
+33 error
+33 error
+33 error For a full report see:
+33 error /Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T04_16_11_126Z-eresolve-report.txt
+34 silly unfinished npm timer reify 1768018571414
+35 silly unfinished npm timer reify:loadTrees 1768018571417
+36 silly unfinished npm timer idealTree:buildDeps 1768018571586
+37 silly unfinished npm timer idealTree:node_modules/@angular/core 1768018572551
+38 verbose cwd /Users/doratang/projects/fortune-teller
+39 verbose os Darwin 24.3.0
+40 verbose node v24.12.0
+41 verbose npm  v11.6.2
+42 verbose exit 1
+43 verbose code 1
+44 error A complete log of this run can be found in: /Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T04_16_11_126Z-debug-0.log

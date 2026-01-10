@@ -1,0 +1,93 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@11.6.2
+2 info using node@v24.12.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/doratang/projects/fortune-teller/.npmrc
+5 silly config load:file:/Users/doratang/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm install @mediapipe/hands @mediapipe/face_mesh
+8 verbose argv "install" "@mediapipe/hands" "@mediapipe/face_mesh" "--legacy-peer-deps"
+9 verbose logfile logs-max:10 dir:/Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T05_01_20_070Z-
+10 verbose logfile /Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T05_01_20_070Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2348810240 maxSize:587202560 maxEntrySize:293601280
+13 silly idealTree buildDeps
+14 silly fetch manifest @mediapipe/hands@*
+15 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fhands cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@mediapipe%2fhands 413ms (cache revalidated)
+17 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fhands set size:67914 disposed:false
+18 silly fetch manifest @mediapipe/face_mesh@*
+19 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fface_mesh cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/@mediapipe%2fface_mesh 455ms (cache revalidated)
+21 silly packumentCache full:https://registry.npmjs.org/@mediapipe%2fface_mesh set size:49774 disposed:false
+22 silly placeDep ROOT @mediapipe/face_mesh@0.4.1633559619 OK for: fortune-teller@0.0.0 want: *
+23 silly placeDep ROOT @mediapipe/hands@0.4.1675469240 OK for: fortune-teller@0.0.0 want: *
+24 silly reify mark retired [
+24 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/readdirp'
+24 silly reify ]
+25 silly reify mark retired [
+25 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/build-angular/node_modules/readdirp'
+25 silly reify ]
+26 silly reify mark retired [
+26 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/schematics/node_modules/readdirp'
+26 silly reify ]
+27 silly reify mark retired [
+27 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular/cli/node_modules/readdirp'
+27 silly reify ]
+28 silly reify mark retired [
+28 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@schematics/angular/node_modules/readdirp'
+28 silly reify ]
+29 silly reify mark retired [ '/Users/doratang/projects/fortune-teller/node_modules/hono' ]
+30 silly reify moves {
+30 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/readdirp': '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/.readdirp-DPDeJEIw',
+30 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/build-angular/node_modules/readdirp': '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/build-angular/node_modules/.readdirp-ybbL5CVv',
+30 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/schematics/node_modules/readdirp': '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/schematics/node_modules/.readdirp-jUnLfypo',
+30 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@angular/cli/node_modules/readdirp': '/Users/doratang/projects/fortune-teller/node_modules/@angular/cli/node_modules/.readdirp-KyF4Chzk',
+30 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/@schematics/angular/node_modules/readdirp': '/Users/doratang/projects/fortune-teller/node_modules/@schematics/angular/node_modules/.readdirp-B3ivg6o0',
+30 silly reify   '/Users/doratang/projects/fortune-teller/node_modules/hono': '/Users/doratang/projects/fortune-teller/node_modules/.hono-zhNoOAqG'
+30 silly reify }
+31 verbose stack Error: EACCES: permission denied, rename '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/readdirp' -> '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/.readdirp-DPDeJEIw'
+31 verbose stack     at async Object.rename (node:internal/fs/promises:787:10)
+31 verbose stack     at async moveFile (/usr/local/lib/node_modules/npm/node_modules/@npmcli/fs/lib/move-file.js:30:5)
+31 verbose stack     at async Promise.allSettled (index 0)
+31 verbose stack     at async [reifyPackages] (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:313:11)
+31 verbose stack     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:125:5)
+31 verbose stack     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+31 verbose stack     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:208:9)
+31 verbose stack     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:67:5)
+32 error code EACCES
+33 error syscall rename
+34 error path /Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/readdirp
+35 error dest /Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/.readdirp-DPDeJEIw
+36 error errno -13
+37 error Error: EACCES: permission denied, rename '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/readdirp' -> '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/.readdirp-DPDeJEIw'
+37 error     at async Object.rename (node:internal/fs/promises:787:10)
+37 error     at async moveFile (/usr/local/lib/node_modules/npm/node_modules/@npmcli/fs/lib/move-file.js:30:5)
+37 error     at async Promise.allSettled (index 0)
+37 error     at async [reifyPackages] (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:313:11)
+37 error     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:125:5)
+37 error     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+37 error     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:208:9)
+37 error     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:67:5) {
+37 error   errno: -13,
+37 error   code: 'EACCES',
+37 error   syscall: 'rename',
+37 error   path: '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/readdirp',
+37 error   dest: '/Users/doratang/projects/fortune-teller/node_modules/@angular-devkit/architect/node_modules/.readdirp-DPDeJEIw'
+37 error }
+38 error
+38 error The operation was rejected by your operating system.
+38 error It is likely you do not have the permissions to access this file as the current user
+38 error
+38 error If you believe this might be a permissions issue, please double-check the
+38 error permissions of the file and its containing directories, or try running
+38 error the command again as root/Administrator.
+39 silly unfinished npm timer reify 1768021280206
+40 silly unfinished npm timer reify:retireShallow 1768021281290
+41 verbose cwd /Users/doratang/projects/fortune-teller
+42 verbose os Darwin 24.3.0
+43 verbose node v24.12.0
+44 verbose npm  v11.6.2
+45 verbose exit -13
+46 verbose code -13
+47 error A complete log of this run can be found in: /Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T05_01_20_070Z-debug-0.log

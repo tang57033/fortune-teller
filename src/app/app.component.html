@@ -427,7 +427,7 @@
               <div class="photo-preview" *ngIf="facePhotoUrl">
                 <img [src]="facePhotoUrl" alt="面部照片预览" />
               </div>
-              <input type="file" accept="image/*" capture="user" (change)="onFaceFileChange($event)" />
+              <input type="file" class="file-input" accept="image/*" capture="user" (change)="onFaceFileChange($event)" />
             </div>
 
             <div class="tips">
@@ -481,7 +481,7 @@
               <div class="photo-preview" *ngIf="fengshuiPhotoUrl">
                 <img [src]="fengshuiPhotoUrl" alt="风水照片预览" />
               </div>
-              <input type="file" accept="image/*" (change)="onFengshuiFileChange($event)" />
+              <input type="file" class="file-input" accept="image/*" (change)="onFengshuiFileChange($event)" />
             </div>
 
             <div class="field">
@@ -803,7 +803,7 @@
               </div>
               <div class="bamboo-result">
                 <h4>第{{ divinationResult.stick.number }}签 · {{ divinationResult.stick.grade }}</h4>
-                <p>{{ divinationResult.stick.meaning }}</p>
+                <p>{{ divinationResult.stick.meaning }} · {{ divinationResult.stick.astro }}</p>
               </div>
             </div>
 

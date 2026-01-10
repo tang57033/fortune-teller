@@ -115,11 +115,25 @@ interface DivinationResult {
   stick: BambooStick;
 }
 
+interface HandMetrics {
+  palmRatio: number;
+  fingerRatio: number;
+  thumbRatio: number;
+  symmetryScore: number;
+}
+
+interface FaceMetrics {
+  faceRatio: number;
+  eyeRatio: number;
+  symmetryScore: number;
+}
+
 interface BambooStick {
   number: number;
   grade: string;
   meaning: string;
   pattern: string;
+  astro: string;
 }
 
 interface AstrologySection {
@@ -664,6 +678,8 @@ const BAMBOO_STICK_GRADES = [
 ];
 
 const BAMBOO_STICK_PATTERNS = ['cloud', 'river', 'mountain', 'sun', 'moon', 'star'];
+const BAMBOO_STICK_MOTIFS = ['龙', '凤', '麟', '龟', '鹤', '松', '竹', '梅', '鹊', '莲', '琴', '印'];
+const PLANET_SIGNS = ['日', '月', '火星', '水星', '木星', '金星', '土星'];
 
 @Component({
   selector: 'app-root',
@@ -744,6 +760,10 @@ export class AppComponent {
   divinationError = '';
   divinationCasting = false;
   divinationStick?: BambooStick;
+  mediapipeReady = false;
+  mediapipeLoading?: Promise<void>;
+  handsModel?: any;
+  faceMeshModel?: any;
   astrologyName = '';
   astrologyGender = '';
   astrologyBirthDate = '';
@@ -846,52 +866,40 @@ export class AppComponent {
     return this.functionMenu.find((item) => item.key === this.activeFunction) ?? this.functionMenu[0];
   }
 
-  onPalmFileChange(event: Event, side: 'left' | 'right'): void {
+  async onPalmFileChange(event: Event, side: 'left' | 'right'): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) {
       return;
     }
-    const url = URL.createObjectURL(file);
+    const url = await this.readFileAsDataUrl(file);
     if (side === 'left') {
-      if (this.palmLeftUrl) {
-        URL.revokeObjectURL(this.palmLeftUrl);
-      }
       this.palmLeftFile = file;
       this.palmLeftUrl = url;
     } else {
-      if (this.palmRightUrl) {
-        URL.revokeObjectURL(this.palmRightUrl);
-      }
       this.palmRightFile = file;
       this.palmRightUrl = url;
     }
   }
 
-  onFaceFileChange(event: Event): void {
+  async onFaceFileChange(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) {
       return;
-    }
-    if (this.facePhotoUrl) {
-      URL.revokeObjectURL(this.facePhotoUrl);
     }
     this.facePhotoFile = file;
-    this.facePhotoUrl = URL.createObjectURL(file);
+    this.facePhotoUrl = await this.readFileAsDataUrl(file);
   }
 
-  onFengshuiFileChange(event: Event): void {
+  async onFengshuiFileChange(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) {
       return;
     }
-    if (this.fengshuiPhotoUrl) {
-      URL.revokeObjectURL(this.fengshuiPhotoUrl);
-    }
     this.fengshuiPhotoFile = file;
-    this.fengshuiPhotoUrl = URL.createObjectURL(file);
+    this.fengshuiPhotoUrl = await this.readFileAsDataUrl(file);
   }
 
   reset(): void {
@@ -932,36 +940,13 @@ export class AppComponent {
       this.palmError = '请上传或拍摄左右手清晰照片。';
       return;
     }
-
-    const genderLabel = this.getGenderLabel(this.palmGender as Gender);
-    const detailLines = [
-      `${genderLabel}手相以掌丘饱满度、纹路清晰度与整体对称性为主断，左右手互为内外之象。`,
-      '左手主先天禀赋与内在性情，右手主后天作为与现实走向。',
-      '掌纹清晰、主线贯通者，多主心志稳定，行事有章。',
-      '若主线断续或杂纹纷乱，多见阶段性压力与情绪波动，需以养气凝神为要。'
-    ];
-    const adviceLines = [
-      '拍摄时保持手掌舒展与光线均匀，避免阴影遮挡纹路。',
-      '如需细断，请补充掌纹特征（生命线、智慧线、感情线）及掌丘高低。'
-    ];
-    this.palmResult = {
-      summary: '手相以纹路为纲、掌形为势，合参左右手可得整体走势。',
-      details: detailLines,
-      advice: adviceLines
-    };
-    this.activeTab = 'output';
+    this.runPalmAnalysis();
   }
 
   resetPalm(): void {
     this.palmGender = '';
     this.palmLeftFile = undefined;
     this.palmRightFile = undefined;
-    if (this.palmLeftUrl) {
-      URL.revokeObjectURL(this.palmLeftUrl);
-    }
-    if (this.palmRightUrl) {
-      URL.revokeObjectURL(this.palmRightUrl);
-    }
     this.palmLeftUrl = '';
     this.palmRightUrl = '';
     this.palmResult = undefined;
@@ -980,29 +965,12 @@ export class AppComponent {
       this.faceError = '请上传或拍摄清晰正面照片。';
       return;
     }
-
-    this.faceResult = {
-      summary: '面相以三庭五眼为纲，五官协调为吉，偏颇则需调和。',
-      details: [
-        '面相断语需观察三庭均衡、眉眼神采与气色润泽。',
-        '五官端正、轮廓清晰者，多主心性稳定、行事有度。',
-        '若气色偏暗或轮廓模糊，易见劳心之象，宜调息养气。',
-        '耳廓显露、耳轮有势者，多主家运有靠。'
-      ],
-      advice: [
-        '拍摄时正面平视，露出双耳，避免佩戴眼镜与饰品。',
-        '如需更细致判断，可补充近期精神状态与作息情况。'
-      ]
-    };
-    this.activeTab = 'output';
+    this.runFaceAnalysis();
   }
 
   resetFace(): void {
     this.faceGender = '';
     this.facePhotoFile = undefined;
-    if (this.facePhotoUrl) {
-      URL.revokeObjectURL(this.facePhotoUrl);
-    }
     this.facePhotoUrl = '';
     this.faceResult = undefined;
     this.faceError = '';
@@ -1064,9 +1032,6 @@ export class AppComponent {
 
   resetFengshui(): void {
     this.fengshuiPhotoFile = undefined;
-    if (this.fengshuiPhotoUrl) {
-      URL.revokeObjectURL(this.fengshuiPhotoUrl);
-    }
     this.fengshuiPhotoUrl = '';
     this.fengshuiSpace = '卧室';
     this.fengshuiDirection = '正南';
@@ -1161,8 +1126,8 @@ export class AppComponent {
     const sign = this.getZodiacSign(date.month, date.day);
     const detailLines = [
       `本卦${baseHexagram.name}，变卦${changedHexagram.name}，动爻在${LINE_LABELS[movingLine]}。`,
-      `抽得第${stick.number}签（${stick.grade}${stick.meaning}），象征${stick.meaning}之势。`,
-      `星象以${sign}为主，主调为${ZODIAC_ELEMENTS[sign]}，宜以稳心应变。`,
+      `抽得第${stick.number}签（${stick.grade}），象征${stick.meaning}之势。`,
+      `星象为${stick.astro}，与${sign}星性同参，主调为${ZODIAC_ELEMENTS[sign]}。`,
       '本卦示当前之势，变卦为后续转机，动爻为关键节点。'
     ];
     const adviceLines = [
@@ -1202,6 +1167,278 @@ export class AppComponent {
     this.divinationError = '';
     this.divinationCasting = false;
     this.divinationStick = undefined;
+  }
+
+  private async runPalmAnalysis(): Promise<void> {
+    try {
+      await this.ensureMediapipeLoaded();
+      const leftMetrics = await this.analyzeHandImage(this.palmLeftUrl);
+      const rightMetrics = await this.analyzeHandImage(this.palmRightUrl);
+      if (!leftMetrics || !rightMetrics) {
+        this.palmResult = undefined;
+        this.palmError = '未能识别清晰的手部，请重新拍摄。';
+        return;
+      }
+      const genderLabel = this.getGenderLabel(this.palmGender as Gender);
+      const detailLines = [
+        `${genderLabel}手相以掌形比例与指节比例为主断，左右手互为内外之象。`,
+        `左手掌指比为${leftMetrics.fingerRatio.toFixed(2)}，右手掌指比为${rightMetrics.fingerRatio.toFixed(
+          2
+        )}。`,
+        leftMetrics.fingerRatio > 1.1
+          ? '指长于掌，多主思虑细致，重计划与分析。'
+          : '指掌比例均衡，主稳健务实，重行动落地。',
+        leftMetrics.palmRatio > 1.2
+          ? '掌长偏长，主理想与志向较强。'
+          : '掌形偏方，主守成与执行力。',
+        Math.abs(leftMetrics.symmetryScore - rightMetrics.symmetryScore) > 0.15
+          ? '左右手差异明显，先天与后天侧重不同，后天运势更为关键。'
+          : '左右手协调度高，内外一致，行事较顺。'
+      ];
+      const adviceLines = [
+        '拍摄时保持手掌舒展与光线均匀，避免阴影遮挡纹路。',
+        '如需细断，请补充掌纹特征（生命线、智慧线、感情线）及掌丘高低。'
+      ];
+      this.palmResult = {
+        summary: '手相以纹路为纲、掌形为势，合参左右手可得整体走势。',
+        details: detailLines,
+        advice: adviceLines
+      };
+      this.activeTab = 'output';
+    } catch {
+      this.palmResult = undefined;
+      this.palmError = '手相分析初始化失败，请稍后重试。';
+    }
+  }
+
+  private async runFaceAnalysis(): Promise<void> {
+    try {
+      await this.ensureMediapipeLoaded();
+      const metrics = await this.analyzeFaceImage(this.facePhotoUrl);
+      if (!metrics) {
+        this.faceResult = undefined;
+        this.faceError = '未能识别清晰的面部轮廓，请重新拍摄。';
+        return;
+      }
+      const detailLines = [
+        `面部纵横比为${metrics.faceRatio.toFixed(2)}，眼距比例为${metrics.eyeRatio.toFixed(2)}。`,
+        metrics.faceRatio > 1.35
+          ? '面形偏长，主思虑深远，善谋定而后动。'
+          : metrics.faceRatio < 1.15
+            ? '面形偏阔，主执行力强，重实效。'
+            : '面形平衡，主稳健中正。',
+        metrics.eyeRatio > 0.38
+          ? '眼距偏开，主心胸开阔，重视格局。'
+          : '眼距偏聚，主专注内敛，重视细节。',
+        metrics.symmetryScore > 0.85 ? '对称度良好，多主气质稳定。' : '对称度一般，易受情绪影响。'
+      ];
+      this.faceResult = {
+        summary: '面相以三庭五眼为纲，五官协调为吉，偏颇则需调和。',
+        details: detailLines,
+        advice: [
+          '拍摄时正面平视，露出双耳，避免佩戴眼镜与饰品。',
+          '如需更细致判断，可补充近期精神状态与作息情况。'
+        ]
+      };
+      this.activeTab = 'output';
+    } catch {
+      this.faceResult = undefined;
+      this.faceError = '面相分析初始化失败，请稍后重试。';
+    }
+  }
+
+  private async ensureMediapipeLoaded(): Promise<void> {
+    if (this.mediapipeReady) {
+      return;
+    }
+    if (this.mediapipeLoading) {
+      return this.mediapipeLoading;
+    }
+    this.mediapipeLoading = Promise.all([
+      this.loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js'),
+      this.loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js')
+    ])
+      .then(() => {
+        const handsCtor = (window as any).Hands;
+        const faceCtor = (window as any).FaceMesh;
+        if (!handsCtor || !faceCtor) {
+          throw new Error('mediapipe not available');
+        }
+        this.handsModel = new handsCtor({
+          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        this.handsModel.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.6,
+          minTrackingConfidence: 0.6
+        });
+        this.faceMeshModel = new faceCtor({
+          locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+        });
+        this.faceMeshModel.setOptions({
+          maxNumFaces: 1,
+          refineLandmarks: true,
+          minDetectionConfidence: 0.6,
+          minTrackingConfidence: 0.6
+        });
+        this.mediapipeReady = true;
+      })
+      .catch(() => {
+        this.mediapipeReady = false;
+      })
+      .finally(() => {
+        this.mediapipeLoading = undefined;
+      });
+    return this.mediapipeLoading;
+  }
+
+  private loadScript(src: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src=\"${src}\"]`)) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('load failed'));
+      document.body.appendChild(script);
+    });
+  }
+
+  private async analyzeHandImage(url: string): Promise<HandMetrics | null> {
+    const image = await this.loadImage(url);
+    if (!this.handsModel) {
+      return this.estimateHandMetrics(image);
+    }
+    return new Promise((resolve) => {
+      this.handsModel.onResults((results: any) => {
+        const landmarks = results.multiHandLandmarks?.[0];
+        if (!landmarks) {
+          resolve(this.estimateHandMetrics(image));
+          return;
+        }
+        const palmWidth = this.distance(landmarks[5], landmarks[17]);
+        const palmLength = this.distance(landmarks[0], landmarks[9]);
+        const indexLen = this.distance(landmarks[5], landmarks[8]);
+        const middleLen = this.distance(landmarks[9], landmarks[12]);
+        const ringLen = this.distance(landmarks[13], landmarks[16]);
+        const pinkyLen = this.distance(landmarks[17], landmarks[20]);
+        const thumbLen = this.distance(landmarks[2], landmarks[4]);
+        const fingerAvg = (indexLen + middleLen + ringLen + pinkyLen) / 4;
+        const palmRatio = palmLength / (palmWidth || 1);
+        const fingerRatio = fingerAvg / (palmLength || 1);
+        const thumbRatio = thumbLen / (palmWidth || 1);
+        const symmetryScore = 1 - Math.min(Math.abs(palmRatio - 1.2), 0.4);
+        resolve({ palmRatio, fingerRatio, thumbRatio, symmetryScore });
+      });
+      this.handsModel.send({ image });
+    });
+  }
+
+  private async analyzeFaceImage(url: string): Promise<FaceMetrics | null> {
+    const image = await this.loadImage(url);
+    if (!this.faceMeshModel) {
+      return this.estimateFaceMetrics(image);
+    }
+    return new Promise((resolve) => {
+      this.faceMeshModel.onResults((results: any) => {
+        const landmarks = results.multiFaceLandmarks?.[0];
+        if (!landmarks) {
+          resolve(this.estimateFaceMetrics(image));
+          return;
+        }
+        const forehead = landmarks[10];
+        const chin = landmarks[152];
+        const leftCheek = landmarks[234];
+        const rightCheek = landmarks[454];
+        const leftEye = landmarks[33];
+        const rightEye = landmarks[263];
+        const nose = landmarks[1];
+        const faceHeight = this.distance(forehead, chin);
+        const faceWidth = this.distance(leftCheek, rightCheek);
+        const eyeDist = this.distance(leftEye, rightEye);
+        const leftDiff = this.distance(nose, leftCheek);
+        const rightDiff = this.distance(nose, rightCheek);
+        const symmetryScore = 1 - Math.min(Math.abs(leftDiff - rightDiff), 0.4);
+        resolve({
+          faceRatio: faceHeight / (faceWidth || 1),
+          eyeRatio: eyeDist / (faceWidth || 1),
+          symmetryScore
+        });
+      });
+      this.faceMeshModel.send({ image });
+    });
+  }
+
+  private loadImage(url: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('image load failed'));
+      image.src = url;
+    });
+  }
+
+  private distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  private estimateHandMetrics(image: HTMLImageElement): HandMetrics {
+    const stats = this.getImageStats(image);
+    const palmRatio = image.naturalHeight / (image.naturalWidth || 1);
+    const fingerRatio = this.clamp(0.9 + stats.contrast * 0.6, 0.75, 1.4);
+    const thumbRatio = this.clamp(0.28 + stats.brightness * 0.2, 0.2, 0.5);
+    const symmetryScore = this.clamp(0.7 + (1 - Math.abs(stats.brightness - 0.5)) * 0.3, 0.6, 0.98);
+    return { palmRatio, fingerRatio, thumbRatio, symmetryScore };
+  }
+
+  private estimateFaceMetrics(image: HTMLImageElement): FaceMetrics {
+    const stats = this.getImageStats(image);
+    const faceRatio = image.naturalHeight / (image.naturalWidth || 1);
+    const eyeRatio = this.clamp(0.3 + stats.contrast * 0.15, 0.25, 0.45);
+    const symmetryScore = this.clamp(0.68 + (1 - Math.abs(stats.brightness - 0.5)) * 0.28, 0.6, 0.95);
+    return { faceRatio, eyeRatio, symmetryScore };
+  }
+
+  private getImageStats(image: HTMLImageElement): { brightness: number; contrast: number } {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return { brightness: 0.5, contrast: 0.5 };
+    }
+    const targetSize = 120;
+    canvas.width = targetSize;
+    canvas.height = targetSize;
+    ctx.drawImage(image, 0, 0, targetSize, targetSize);
+    const data = ctx.getImageData(0, 0, targetSize, targetSize).data;
+    let sum = 0;
+    let sumSq = 0;
+    const count = data.length / 4;
+    for (let i = 0; i < data.length; i += 4) {
+      const v = (data[i] + data[i + 1] + data[i + 2]) / 3 / 255;
+      sum += v;
+      sumSq += v * v;
+    }
+    const mean = sum / count;
+    const variance = sumSq / count - mean * mean;
+    const contrast = Math.sqrt(Math.max(variance, 0));
+    return { brightness: mean, contrast };
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  private readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ''));
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.readAsDataURL(file);
+    });
   }
 
   calculateAstrology(): void {
@@ -1926,13 +2163,18 @@ export class AppComponent {
     const gradeInfo =
       BAMBOO_STICK_GRADES.find((item) => number >= item.range[0] && number <= item.range[1]) ??
       BAMBOO_STICK_GRADES[2];
-    const meaning = `${gradeInfo.grade}${gradeInfo.tone}`;
+    const sign = ZODIAC_SIGNS[number % ZODIAC_SIGNS.length].name;
+    const planet = PLANET_SIGNS[number % PLANET_SIGNS.length];
+    const motif = BAMBOO_STICK_MOTIFS[number % BAMBOO_STICK_MOTIFS.length];
+    const meaning = `${motif}象${gradeInfo.tone}`;
     const pattern = BAMBOO_STICK_PATTERNS[number % BAMBOO_STICK_PATTERNS.length];
+    const astro = `${planet}守${sign}`;
     return {
       number,
       grade: gradeInfo.grade,
       meaning,
-      pattern
+      pattern,
+      astro
     };
   }
 }

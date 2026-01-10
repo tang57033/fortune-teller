@@ -1,0 +1,208 @@
+'Log files:
+/Users/doratang/projects/fortune-teller/.npm-cache/_logs/2026-01-10T04_16_11_126Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: @angular/core@21.0.8
+Found: zone.js@0.14.10
+node_modules/zone.js
+  zone.js@"~0.14.3" from the root project
+
+Could not resolve dependency:
+peerOptional zone.js@"~0.15.0 || ~0.16.0" from @angular/core@21.0.8
+node_modules/@angular/core
+  peerOptional @angular/core@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+  node_modules/@angular-devkit/build-angular
+    dev @angular-devkit/build-angular@"^21.0.5" from the root project
+  peerOptional @angular/core@"^21.0.0" from @angular/build@21.0.5
+  node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+    @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+    node_modules/@angular-devkit/build-angular
+      dev @angular-devkit/build-angular@"^21.0.5" from the root project
+  peer @angular/core@"21.0.8" from @angular/animations@21.0.8
+  node_modules/@angular/animations
+    peerOptional @angular/animations@"21.0.8" from @angular/platform-browser@21.0.8
+    node_modules/@angular/platform-browser
+      peerOptional @angular/platform-browser@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+      node_modules/@angular-devkit/build-angular
+        dev @angular-devkit/build-angular@"^21.0.5" from the root project
+      peerOptional @angular/platform-browser@"^21.0.0" from @angular/build@21.0.5
+      node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+        @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+        node_modules/@angular-devkit/build-angular
+          dev @angular-devkit/build-angular@"^21.0.5" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/forms@21.0.8
+      node_modules/@angular/forms
+        @angular/forms@"^21.0.6" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+      node_modules/@angular/platform-browser-dynamic
+        @angular/platform-browser-dynamic@"^21.0.6" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/router@21.0.8
+      node_modules/@angular/router
+        @angular/router@"^21.0.6" from the root project
+      @angular/platform-browser@"^21.0.6" from the root project
+    @angular/animations@"^21.0.6" from the root project
+  peer @angular/core@"21.0.8" from @angular/common@21.0.8
+  node_modules/@angular/common
+    peer @angular/common@"21.0.8" from @angular/forms@21.0.8
+    node_modules/@angular/forms
+      @angular/forms@"^21.0.6" from the root project
+    peer @angular/common@"21.0.8" from @angular/platform-browser@21.0.8
+    node_modules/@angular/platform-browser
+      peerOptional @angular/platform-browser@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+      node_modules/@angular-devkit/build-angular
+        dev @angular-devkit/build-angular@"^21.0.5" from the root project
+      peerOptional @angular/platform-browser@"^21.0.0" from @angular/build@21.0.5
+      node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+        @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+        node_modules/@angular-devkit/build-angular
+          dev @angular-devkit/build-angular@"^21.0.5" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/forms@21.0.8
+      node_modules/@angular/forms
+        @angular/forms@"^21.0.6" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+      node_modules/@angular/platform-browser-dynamic
+        @angular/platform-browser-dynamic@"^21.0.6" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/router@21.0.8
+      node_modules/@angular/router
+        @angular/router@"^21.0.6" from the root project
+      @angular/platform-browser@"^21.0.6" from the root project
+    peer @angular/common@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+    node_modules/@angular/platform-browser-dynamic
+      @angular/platform-browser-dynamic@"^21.0.6" from the root project
+    peer @angular/common@"21.0.8" from @angular/router@21.0.8
+    node_modules/@angular/router
+      @angular/router@"^21.0.6" from the root project
+    @angular/common@"^21.0.6" from the root project
+  peer @angular/core@"21.0.8" from @angular/forms@21.0.8
+  node_modules/@angular/forms
+    @angular/forms@"^21.0.6" from the root project
+  peer @angular/core@"21.0.8" from @angular/platform-browser@21.0.8
+  node_modules/@angular/platform-browser
+    peerOptional @angular/platform-browser@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+    node_modules/@angular-devkit/build-angular
+      dev @angular-devkit/build-angular@"^21.0.5" from the root project
+    peerOptional @angular/platform-browser@"^21.0.0" from @angular/build@21.0.5
+    node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+      @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+      node_modules/@angular-devkit/build-angular
+        dev @angular-devkit/build-angular@"^21.0.5" from the root project
+    peer @angular/platform-browser@"21.0.8" from @angular/forms@21.0.8
+    node_modules/@angular/forms
+      @angular/forms@"^21.0.6" from the root project
+    peer @angular/platform-browser@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+    node_modules/@angular/platform-browser-dynamic
+      @angular/platform-browser-dynamic@"^21.0.6" from the root project
+    peer @angular/platform-browser@"21.0.8" from @angular/router@21.0.8
+    node_modules/@angular/router
+      @angular/router@"^21.0.6" from the root project
+    @angular/platform-browser@"^21.0.6" from the root project
+  peer @angular/core@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+  node_modules/@angular/platform-browser-dynamic
+    @angular/platform-browser-dynamic@"^21.0.6" from the root project
+  peer @angular/core@"21.0.8" from @angular/router@21.0.8
+  node_modules/@angular/router
+    @angular/router@"^21.0.6" from the root project
+  @angular/core@"^21.0.6" from the root project
+
+Conflicting peer dependency: zone.js@0.16.0
+node_modules/zone.js
+  peerOptional zone.js@"~0.15.0 || ~0.16.0" from @angular/core@21.0.8
+  node_modules/@angular/core
+    peerOptional @angular/core@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+    node_modules/@angular-devkit/build-angular
+      dev @angular-devkit/build-angular@"^21.0.5" from the root project
+    peerOptional @angular/core@"^21.0.0" from @angular/build@21.0.5
+    node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+      @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+      node_modules/@angular-devkit/build-angular
+        dev @angular-devkit/build-angular@"^21.0.5" from the root project
+    peer @angular/core@"21.0.8" from @angular/animations@21.0.8
+    node_modules/@angular/animations
+      peerOptional @angular/animations@"21.0.8" from @angular/platform-browser@21.0.8
+      node_modules/@angular/platform-browser
+        peerOptional @angular/platform-browser@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+        node_modules/@angular-devkit/build-angular
+          dev @angular-devkit/build-angular@"^21.0.5" from the root project
+        peerOptional @angular/platform-browser@"^21.0.0" from @angular/build@21.0.5
+        node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+          @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+          node_modules/@angular-devkit/build-angular
+            dev @angular-devkit/build-angular@"^21.0.5" from the root project
+        peer @angular/platform-browser@"21.0.8" from @angular/forms@21.0.8
+        node_modules/@angular/forms
+          @angular/forms@"^21.0.6" from the root project
+        peer @angular/platform-browser@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+        node_modules/@angular/platform-browser-dynamic
+          @angular/platform-browser-dynamic@"^21.0.6" from the root project
+        peer @angular/platform-browser@"21.0.8" from @angular/router@21.0.8
+        node_modules/@angular/router
+          @angular/router@"^21.0.6" from the root project
+        @angular/platform-browser@"^21.0.6" from the root project
+      @angular/animations@"^21.0.6" from the root project
+    peer @angular/core@"21.0.8" from @angular/common@21.0.8
+    node_modules/@angular/common
+      peer @angular/common@"21.0.8" from @angular/forms@21.0.8
+      node_modules/@angular/forms
+        @angular/forms@"^21.0.6" from the root project
+      peer @angular/common@"21.0.8" from @angular/platform-browser@21.0.8
+      node_modules/@angular/platform-browser
+        peerOptional @angular/platform-browser@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+        node_modules/@angular-devkit/build-angular
+          dev @angular-devkit/build-angular@"^21.0.5" from the root project
+        peerOptional @angular/platform-browser@"^21.0.0" from @angular/build@21.0.5
+        node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+          @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+          node_modules/@angular-devkit/build-angular
+            dev @angular-devkit/build-angular@"^21.0.5" from the root project
+        peer @angular/platform-browser@"21.0.8" from @angular/forms@21.0.8
+        node_modules/@angular/forms
+          @angular/forms@"^21.0.6" from the root project
+        peer @angular/platform-browser@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+        node_modules/@angular/platform-browser-dynamic
+          @angular/platform-browser-dynamic@"^21.0.6" from the root project
+        peer @angular/platform-browser@"21.0.8" from @angular/router@21.0.8
+        node_modules/@angular/router
+          @angular/router@"^21.0.6" from the root project
+        @angular/platform-browser@"^21.0.6" from the root project
+      peer @angular/common@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+      node_modules/@angular/platform-browser-dynamic
+        @angular/platform-browser-dynamic@"^21.0.6" from the root project
+      peer @angular/common@"21.0.8" from @angular/router@21.0.8
+      node_modules/@angular/router
+        @angular/router@"^21.0.6" from the root project
+      @angular/common@"^21.0.6" from the root project
+    peer @angular/core@"21.0.8" from @angular/forms@21.0.8
+    node_modules/@angular/forms
+      @angular/forms@"^21.0.6" from the root project
+    peer @angular/core@"21.0.8" from @angular/platform-browser@21.0.8
+    node_modules/@angular/platform-browser
+      peerOptional @angular/platform-browser@"^21.0.0" from @angular-devkit/build-angular@21.0.5
+      node_modules/@angular-devkit/build-angular
+        dev @angular-devkit/build-angular@"^21.0.5" from the root project
+      peerOptional @angular/platform-browser@"^21.0.0" from @angular/build@21.0.5
+      node_modules/@angular-devkit/build-angular/node_modules/@angular/build
+        @angular/build@"21.0.5" from @angular-devkit/build-angular@21.0.5
+        node_modules/@angular-devkit/build-angular
+          dev @angular-devkit/build-angular@"^21.0.5" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/forms@21.0.8
+      node_modules/@angular/forms
+        @angular/forms@"^21.0.6" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+      node_modules/@angular/platform-browser-dynamic
+        @angular/platform-browser-dynamic@"^21.0.6" from the root project
+      peer @angular/platform-browser@"21.0.8" from @angular/router@21.0.8
+      node_modules/@angular/router
+        @angular/router@"^21.0.6" from the root project
+      @angular/platform-browser@"^21.0.6" from the root project
+    peer @angular/core@"21.0.8" from @angular/platform-browser-dynamic@21.0.8
+    node_modules/@angular/platform-browser-dynamic
+      @angular/platform-browser-dynamic@"^21.0.6" from the root project
+    peer @angular/core@"21.0.8" from @angular/router@21.0.8
+    node_modules/@angular/router
+      @angular/router@"^21.0.6" from the root project
+    @angular/core@"^21.0.6" from the root project
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.

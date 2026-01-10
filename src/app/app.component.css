@@ -508,16 +508,20 @@ button:hover {
   overflow: hidden;
   border: 1px solid rgba(80, 62, 44, 0.12);
   background: rgba(250, 245, 238, 0.6);
+  max-height: 220px;
+  aspect-ratio: 4 / 3;
 }
 
 .photo-preview img {
   width: 100%;
+  height: 100%;
   display: block;
   object-fit: cover;
 }
 
 .file-input {
-  max-width: 220px;
+  width: 100%;
+  max-width: 280px;
 }
 
 .bamboo-draw {
@@ -700,6 +704,11 @@ button:hover {
 
   .bamboo-draw {
     grid-template-columns: 1fr;
+  }
+
+  .photo-preview {
+    max-height: 180px;
+    aspect-ratio: 3 / 4;
   }
 }
 
