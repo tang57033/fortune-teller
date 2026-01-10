@@ -202,7 +202,7 @@ button:hover {
 
 .function-nav {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -516,6 +516,101 @@ button:hover {
   object-fit: cover;
 }
 
+.file-input {
+  max-width: 220px;
+}
+
+.bamboo-draw {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(180px, 220px) 1fr;
+  align-items: center;
+  margin: 16px 0 24px;
+}
+
+.bamboo-cup {
+  position: relative;
+  height: 200px;
+  display: grid;
+  place-items: center;
+}
+
+.cup-body {
+  width: 140px;
+  height: 120px;
+  border-radius: 0 0 60px 60px;
+  background: linear-gradient(160deg, #3b2a1c, #8c6a45);
+  position: relative;
+  z-index: 1;
+}
+
+.cup-base {
+  width: 120px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(58, 42, 29, 0.8);
+  margin-top: -8px;
+  z-index: 0;
+}
+
+.bamboo-stick {
+  position: absolute;
+  width: 20px;
+  height: 140px;
+  background: linear-gradient(180deg, #d9b27a, #b88751);
+  border-radius: 8px;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  box-shadow: 0 10px 18px rgba(45, 32, 20, 0.2);
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  color: #3a2a1c;
+}
+
+.bamboo-stick::after {
+  content: attr(data-number);
+}
+
+.bamboo-stick.cloud {
+  background: linear-gradient(180deg, #e2cda8, #c59a66);
+}
+
+.bamboo-stick.river {
+  background: linear-gradient(180deg, #d8c38b, #b48a55);
+}
+
+.bamboo-stick.mountain {
+  background: linear-gradient(180deg, #d0b07a, #9b6a3f);
+}
+
+.bamboo-stick.sun {
+  background: linear-gradient(180deg, #f0c37a, #c9823c);
+}
+
+.bamboo-stick.moon {
+  background: linear-gradient(180deg, #e6d6b5, #b4956b);
+}
+
+.bamboo-stick.star {
+  background: linear-gradient(180deg, #dfc28e, #a77649);
+}
+
+.bamboo-draw.casting .bamboo-stick {
+  animation: toss 0.8s ease-in-out;
+}
+
+.bamboo-result h4 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.bamboo-result p {
+  margin: 0;
+  color: #5d4a3a;
+}
+
 .name-options {
   display: grid;
   gap: 12px;
@@ -581,7 +676,7 @@ button:hover {
   }
 
   .function-nav {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -597,5 +692,27 @@ button:hover {
 
   .actions {
     flex-direction: column;
+  }
+
+  .function-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bamboo-draw {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes toss {
+  0% {
+    transform: translateX(-50%) translateY(20px) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(-50%) translateY(-40px) rotate(-6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) rotate(0deg);
   }
 }

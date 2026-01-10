@@ -11,7 +11,8 @@ type FunctionKey =
   | 'face'
   | 'fengshui'
   | 'naming'
-  | 'divination';
+  | 'divination'
+  | 'astrology';
 type TabKey = 'input' | 'output';
 
 interface Trigram {
@@ -110,6 +111,27 @@ interface DivinationResult {
   changedLines: LineDisplay[];
   summary: string;
   details: string[];
+  advice: string[];
+  stick: BambooStick;
+}
+
+interface BambooStick {
+  number: number;
+  grade: string;
+  meaning: string;
+  pattern: string;
+}
+
+interface AstrologySection {
+  title: string;
+  text: string;
+}
+
+interface AstrologyResult {
+  summary: string;
+  sign: string;
+  rising: string;
+  sections: AstrologySection[];
   advice: string[];
 }
 
@@ -538,7 +560,8 @@ const FUNCTION_MENU = [
   { key: 'face' as FunctionKey, label: '看面相', hint: '五官气质断语' },
   { key: 'fengshui' as FunctionKey, label: '看风水', hint: '场域与环境格局' },
   { key: 'naming' as FunctionKey, label: '新生儿取名', hint: '姓名寓意与气质' },
-  { key: 'divination' as FunctionKey, label: '大事摇卦占卜', hint: '随机摇卦解象' }
+  { key: 'divination' as FunctionKey, label: '大事摇卦占卜', hint: '随机摇卦解象' },
+  { key: 'astrology' as FunctionKey, label: '占星术', hint: '星盘轨迹解析' }
 ];
 
 const DIRECTION_OPTIONS = [
@@ -599,6 +622,49 @@ const NAME_TAG_THEMES = [
   { tag: 'mind', label: '心性明朗' }
 ];
 
+const ZODIAC_SIGNS = [
+  { name: '白羊座', start: [3, 21] },
+  { name: '金牛座', start: [4, 20] },
+  { name: '双子座', start: [5, 21] },
+  { name: '巨蟹座', start: [6, 21] },
+  { name: '狮子座', start: [7, 23] },
+  { name: '处女座', start: [8, 23] },
+  { name: '天秤座', start: [9, 23] },
+  { name: '天蝎座', start: [10, 23] },
+  { name: '射手座', start: [11, 22] },
+  { name: '摩羯座', start: [12, 22] },
+  { name: '水瓶座', start: [1, 20] },
+  { name: '双鱼座', start: [2, 19] }
+];
+
+const ZODIAC_ELEMENTS: Record<string, string> = {
+  白羊座: '火',
+  狮子座: '火',
+  射手座: '火',
+  金牛座: '土',
+  处女座: '土',
+  摩羯座: '土',
+  双子座: '风',
+  天秤座: '风',
+  水瓶座: '风',
+  巨蟹座: '水',
+  天蝎座: '水',
+  双鱼座: '水'
+};
+
+const RISING_SIGNS = ['上升白羊', '上升金牛', '上升双子', '上升巨蟹', '上升狮子', '上升处女', '上升天秤', '上升天蝎', '上升射手', '上升摩羯', '上升水瓶', '上升双鱼'];
+
+const BAMBOO_STICK_GRADES = [
+  { range: [1, 18], grade: '上上', tone: '吉' },
+  { range: [19, 36], grade: '上中', tone: '吉' },
+  { range: [37, 54], grade: '中平', tone: '平' },
+  { range: [55, 72], grade: '中下', tone: '慎' },
+  { range: [73, 90], grade: '下中', tone: '谨' },
+  { range: [91, 108], grade: '下下', tone: '警' }
+];
+
+const BAMBOO_STICK_PATTERNS = ['cloud', 'river', 'mountain', 'sun', 'moon', 'star'];
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -642,9 +708,6 @@ export class AppComponent {
   faceGender = '';
   facePhotoFile?: File;
   facePhotoUrl = '';
-  faceForehead = 'medium';
-  faceNose = 'medium';
-  faceChin = 'medium';
   faceResult?: FaceResult;
   faceError = '';
   fengshuiPhotoFile?: File;
@@ -679,6 +742,18 @@ export class AppComponent {
   divinationTopic = '';
   divinationResult?: DivinationResult;
   divinationError = '';
+  divinationCasting = false;
+  divinationStick?: BambooStick;
+  astrologyName = '';
+  astrologyGender = '';
+  astrologyBirthDate = '';
+  astrologyBirthTime = '12:00';
+  astrologyTimeMode: TimeMode = 'time';
+  astrologyShichenIndex = 6;
+  astrologyLocation = '';
+  astrologyFocus = '';
+  astrologyResult?: AstrologyResult;
+  astrologyError = '';
 
   calculate(): void {
     this.errorMessage = '';
@@ -906,29 +981,18 @@ export class AppComponent {
       return;
     }
 
-    const foreheadNote =
-      this.faceForehead === 'wide'
-        ? '额广饱满，主思维开阔、见识深远。'
-        : this.faceForehead === 'narrow'
-          ? '额窄而紧，主谨慎务实，偏重执行。'
-          : '额形平正，主稳健理性。';
-    const noseNote =
-      this.faceNose === 'prominent'
-        ? '鼻梁挺拔，主决断力强，财气易聚。'
-        : this.faceNose === 'soft'
-          ? '鼻势柔和，主圆融稳妥，贵在守成。'
-          : '鼻形适中，主进退有度。';
-    const chinNote =
-      this.faceChin === 'full'
-        ? '下庭丰满，主晚运稳厚、家庭根基稳。'
-        : this.faceChin === 'sharp'
-          ? '下庭偏尖，主行动敏捷但宜稳心性。'
-          : '下庭平衡，主顺势而行。';
-
     this.faceResult = {
       summary: '面相以三庭五眼为纲，五官协调为吉，偏颇则需调和。',
-      details: [foreheadNote, noseNote, chinNote, '耳廓显露、轮廓分明者，多主家运有靠。'],
-      advice: ['拍摄时正面平视，露出双耳，避免佩戴眼镜与饰品。', '面相需结合气色与神态综合判断。']
+      details: [
+        '面相断语需观察三庭均衡、眉眼神采与气色润泽。',
+        '五官端正、轮廓清晰者，多主心性稳定、行事有度。',
+        '若气色偏暗或轮廓模糊，易见劳心之象，宜调息养气。',
+        '耳廓显露、耳轮有势者，多主家运有靠。'
+      ],
+      advice: [
+        '拍摄时正面平视，露出双耳，避免佩戴眼镜与饰品。',
+        '如需更细致判断，可补充近期精神状态与作息情况。'
+      ]
     };
     this.activeTab = 'output';
   }
@@ -940,9 +1004,6 @@ export class AppComponent {
       URL.revokeObjectURL(this.facePhotoUrl);
     }
     this.facePhotoUrl = '';
-    this.faceForehead = 'medium';
-    this.faceNose = 'medium';
-    this.faceChin = 'medium';
     this.faceResult = undefined;
     this.faceError = '';
   }
@@ -1096,16 +1157,25 @@ export class AppComponent {
     const baseHexagram = reading.baseHexagram;
     const changedHexagram = reading.changedHexagram;
     const movingLine = reading.movingLine;
+    const stick = this.pickBambooStick();
+    const sign = this.getZodiacSign(date.month, date.day);
     const detailLines = [
       `本卦${baseHexagram.name}，变卦${changedHexagram.name}，动爻在${LINE_LABELS[movingLine]}。`,
-      '本卦示当前之势，变卦为后续转机，动爻为关键节点。',
-      '问事宜循时而动，先稳基础再求突破。'
+      `抽得第${stick.number}签（${stick.grade}${stick.meaning}），象征${stick.meaning}之势。`,
+      `星象以${sign}为主，主调为${ZODIAC_ELEMENTS[sign]}，宜以稳心应变。`,
+      '本卦示当前之势，变卦为后续转机，动爻为关键节点。'
     ];
     const adviceLines = [
       '所问之事宜明其核心目标，避免多线并进。',
-      '出现变卦之象时，先小试探再做大决定。'
+      '出现变卦之象时，先小试探再做大决定。',
+      '星象示势，心性为主，宜守正不躁。'
     ];
 
+    this.divinationCasting = true;
+    window.setTimeout(() => {
+      this.divinationCasting = false;
+    }, 900);
+    this.divinationStick = stick;
     this.divinationResult = {
       baseHexagram,
       changedHexagram,
@@ -1114,7 +1184,8 @@ export class AppComponent {
       changedLines: this.toDisplayLines(reading.changedLinesRaw),
       summary: `所问「${this.divinationTopic.trim()}」以卦象为凭，主势已定，机变在后。`,
       details: detailLines,
-      advice: adviceLines
+      advice: adviceLines,
+      stick
     };
     this.activeTab = 'output';
   }
@@ -1129,6 +1200,77 @@ export class AppComponent {
     this.divinationTopic = '';
     this.divinationResult = undefined;
     this.divinationError = '';
+    this.divinationCasting = false;
+    this.divinationStick = undefined;
+  }
+
+  calculateAstrology(): void {
+    this.astrologyError = '';
+    if (!this.astrologyName.trim()) {
+      this.astrologyResult = undefined;
+      this.astrologyError = '请输入姓名。';
+      return;
+    }
+    if (!this.astrologyGender) {
+      this.astrologyResult = undefined;
+      this.astrologyError = '请选择性别。';
+      return;
+    }
+    const date = this.parseDate(this.astrologyBirthDate);
+    if (!date) {
+      this.astrologyResult = undefined;
+      this.astrologyError = '请输入有效的出生日期。';
+      return;
+    }
+    const hourIndex = this.getHourIndex(
+      this.astrologyTimeMode,
+      this.astrologyBirthTime,
+      this.astrologyShichenIndex
+    );
+    if (hourIndex === null) {
+      this.astrologyResult = undefined;
+      this.astrologyError = '请输入有效的出生时间或选择时辰。';
+      return;
+    }
+    if (!this.astrologyLocation.trim()) {
+      this.astrologyResult = undefined;
+      this.astrologyError = '请填写出生地或常住地。';
+      return;
+    }
+
+    const sign = this.getZodiacSign(date.month, date.day);
+    const rising = RISING_SIGNS[hourIndex % RISING_SIGNS.length];
+    const element = ZODIAC_ELEMENTS[sign];
+    const focus = this.astrologyFocus.trim() || '整体运势';
+    const seed = (date.year + date.month + date.day + hourIndex) % 5;
+    const mood = ['行星入旺，势强', '星轨平稳，守中', '星势偏转，宜调和', '星能内收，宜蓄势', '星象跃动，宜把握'][seed];
+
+    this.astrologyResult = {
+      summary: `${this.astrologyName}的太阳星座为${sign}，${rising}为外显气质，${element}象主调。`,
+      sign,
+      rising,
+      sections: [
+        { title: '星象解运', text: `主调为${element}象，${mood}，${focus}宜以稳中求进。` },
+        { title: '星辰占卜', text: `太阳星座${sign}主心性，${rising}主行事风格，内外合参得势。` },
+        { title: '星轨命理', text: `星轨强调节律，近期宜先稳基础，再寻突破之机。` },
+        { title: '星图解命', text: `出生地${this.astrologyLocation.trim()}为参考点，星盘重在气机流转。` }
+      ],
+      advice: ['保持作息与节律稳定，行星势能更易发挥。', '聚焦一到两项核心目标，避免分心耗散。']
+    };
+    this.activeTab = 'output';
+  }
+
+  resetAstrology(): void {
+    this.astrologyName = '';
+    this.astrologyGender = '';
+    this.astrologyBirthDate = '';
+    this.astrologyBirthTime = '12:00';
+    this.astrologyTimeMode = 'time';
+    this.astrologyShichenIndex = 6;
+    this.astrologyLocation = '';
+    this.astrologyFocus = '';
+    this.astrologyResult = undefined;
+    this.astrologyError = '';
   }
 
   private parseDate(dateStr: string): { year: number; month: number; day: number } | null {
@@ -1758,5 +1900,39 @@ export class AppComponent {
   private mapNameTheme(tags: string[]): string {
     const matched = NAME_TAG_THEMES.find((item) => tags.includes(item.tag));
     return matched ? matched.label : '和顺雅正';
+  }
+
+  private getZodiacSign(month: number, day: number): string {
+    const matches = ZODIAC_SIGNS.find((sign, index) => {
+      const [startMonth, startDay] = sign.start;
+      const next = ZODIAC_SIGNS[(index + 1) % ZODIAC_SIGNS.length];
+      const [nextMonth, nextDay] = next.start;
+      if (startMonth === 12) {
+        return (month === 12 && day >= startDay) || (month === 1 && day < nextDay);
+      }
+      if (month === startMonth && day >= startDay) {
+        return true;
+      }
+      if (month === nextMonth && day < nextDay) {
+        return true;
+      }
+      return month > startMonth && month < nextMonth;
+    });
+    return matches?.name ?? '未知';
+  }
+
+  private pickBambooStick(): BambooStick {
+    const number = Math.floor(Math.random() * 108) + 1;
+    const gradeInfo =
+      BAMBOO_STICK_GRADES.find((item) => number >= item.range[0] && number <= item.range[1]) ??
+      BAMBOO_STICK_GRADES[2];
+    const meaning = `${gradeInfo.grade}${gradeInfo.tone}`;
+    const pattern = BAMBOO_STICK_PATTERNS[number % BAMBOO_STICK_PATTERNS.length];
+    return {
+      number,
+      grade: gradeInfo.grade,
+      meaning,
+      pattern
+    };
   }
 }

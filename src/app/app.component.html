@@ -341,6 +341,7 @@
                   <img [src]="palmLeftUrl" alt="左手照片预览" />
                 </div>
                 <input
+                  class="file-input"
                   type="file"
                   accept="image/*"
                   capture="environment"
@@ -356,6 +357,7 @@
                   <img [src]="palmRightUrl" alt="右手照片预览" />
                 </div>
                 <input
+                  class="file-input"
                   type="file"
                   accept="image/*"
                   capture="environment"
@@ -428,31 +430,8 @@
               <input type="file" accept="image/*" capture="user" (change)="onFaceFileChange($event)" />
             </div>
 
-            <div class="field">
-              <label for="faceForehead">额头特征</label>
-              <select id="faceForehead" name="faceForehead" [(ngModel)]="faceForehead">
-                <option value="wide">额广饱满</option>
-                <option value="medium">额形平正</option>
-                <option value="narrow">额窄偏紧</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="faceNose">鼻形特征</label>
-              <select id="faceNose" name="faceNose" [(ngModel)]="faceNose">
-                <option value="prominent">鼻梁挺拔</option>
-                <option value="medium">鼻形适中</option>
-                <option value="soft">鼻势柔和</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="faceChin">下颌特征</label>
-              <select id="faceChin" name="faceChin" [(ngModel)]="faceChin">
-                <option value="full">下庭丰满</option>
-                <option value="medium">下庭平衡</option>
-                <option value="sharp">下庭偏尖</option>
-              </select>
+            <div class="tips">
+              <p>面相判断需要气色与神态，建议在自然光下拍摄。</p>
             </div>
 
             <div class="actions">
@@ -812,6 +791,22 @@
               <div class="badge">摇卦占卜</div>
             </div>
 
+            <div class="bamboo-draw" [class.casting]="divinationCasting">
+              <div class="bamboo-cup">
+                <div class="cup-body"></div>
+                <div class="cup-base"></div>
+                <div
+                  class="bamboo-stick"
+                  [class]="divinationResult.stick.pattern"
+                  [attr.data-number]="divinationResult.stick.number"
+                ></div>
+              </div>
+              <div class="bamboo-result">
+                <h4>第{{ divinationResult.stick.number }}签 · {{ divinationResult.stick.grade }}</h4>
+                <p>{{ divinationResult.stick.meaning }}</p>
+              </div>
+            </div>
+
             <div class="hexagram-block">
               <div class="hexagram">
                 <h4>本卦</h4>
@@ -861,6 +856,130 @@
             <div class="empty-state">
               <h3>暂无输出</h3>
               <p>请先填写摇卦占卜信息并提交。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'astrology'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculateAstrology()" #astrologyForm="ngForm">
+            <div class="field">
+              <label for="astrologyName">姓名</label>
+              <input id="astrologyName" name="astrologyName" type="text" required [(ngModel)]="astrologyName" />
+            </div>
+
+            <div class="field">
+              <label for="astrologyGender">性别</label>
+              <select id="astrologyGender" name="astrologyGender" required [(ngModel)]="astrologyGender">
+                <option value="" disabled>请选择</option>
+                <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="astrologyBirthDate">出生日期</label>
+              <input
+                id="astrologyBirthDate"
+                name="astrologyBirthDate"
+                type="date"
+                required
+                [(ngModel)]="astrologyBirthDate"
+              />
+            </div>
+
+            <div class="field">
+              <label>出生时间</label>
+              <div class="segmented">
+                <label class="segment">
+                  <input type="radio" name="astrologyTimeMode" value="time" [(ngModel)]="astrologyTimeMode" />
+                  具体时间
+                </label>
+                <label class="segment">
+                  <input type="radio" name="astrologyTimeMode" value="shichen" [(ngModel)]="astrologyTimeMode" />
+                  时辰
+                </label>
+              </div>
+            </div>
+
+            <div class="field" *ngIf="astrologyTimeMode === 'time'">
+              <label for="astrologyBirthTime">时间 (24小时制)</label>
+              <input
+                id="astrologyBirthTime"
+                name="astrologyBirthTime"
+                type="time"
+                required
+                [(ngModel)]="astrologyBirthTime"
+              />
+            </div>
+
+            <div class="field" *ngIf="astrologyTimeMode === 'shichen'">
+              <label for="astrologyShichen">出生时辰</label>
+              <select id="astrologyShichen" name="astrologyShichen" [(ngModel)]="astrologyShichenIndex">
+                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="astrologyLocation">出生地/常住地</label>
+              <input
+                id="astrologyLocation"
+                name="astrologyLocation"
+                type="text"
+                required
+                [(ngModel)]="astrologyLocation"
+              />
+            </div>
+
+            <div class="field">
+              <label for="astrologyFocus">关注方向</label>
+              <textarea
+                id="astrologyFocus"
+                name="astrologyFocus"
+                rows="3"
+                [(ngModel)]="astrologyFocus"
+                placeholder="例如：事业、感情、学业、财运。"
+              ></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">生成星盘解读</button>
+              <button class="ghost" type="button" (click)="resetAstrology()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="astrologyError">{{ astrologyError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="astrologyResult; else astrologyEmpty">
+            <div class="result-header">
+              <div>
+                <h3>占星解读</h3>
+                <p>{{ astrologyResult.sign }} · {{ astrologyResult.rising }}</p>
+              </div>
+              <div class="badge">星盘解析</div>
+            </div>
+            <p class="summary">{{ astrologyResult.summary }}</p>
+            <div class="sections">
+              <div class="section" *ngFor="let section of astrologyResult.sections">
+                <h4>{{ section.title }}</h4>
+                <p class="section-description">{{ section.text }}</p>
+              </div>
+            </div>
+            <div class="match-advice">
+              <h4>建议</h4>
+              <p *ngFor="let line of astrologyResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #astrologyEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先填写占星术信息并提交。</p>
             </div>
           </ng-template>
         </ng-container>
