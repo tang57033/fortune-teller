@@ -399,8 +399,8 @@
           </ng-container>
           <ng-template #palmEmpty>
             <div class="empty-state">
-              <h3>暂无输出</h3>
-              <p>请先上传左右手照片并提交。</p>
+              <h3>{{ palmLoading ? '解析中' : '暂无输出' }}</h3>
+              <p>{{ palmLoading ? '正在分析手相特征，请稍候。' : '请先上传左右手照片并提交。' }}</p>
             </div>
           </ng-template>
         </ng-container>
@@ -463,8 +463,8 @@
           </ng-container>
           <ng-template #faceEmpty>
             <div class="empty-state">
-              <h3>暂无输出</h3>
-              <p>请先上传面部照片并提交。</p>
+              <h3>{{ faceLoading ? '解析中' : '暂无输出' }}</h3>
+              <p>{{ faceLoading ? '正在分析面相特征，请稍候。' : '请先上传面部照片并提交。' }}</p>
             </div>
           </ng-template>
         </ng-container>

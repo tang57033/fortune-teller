@@ -120,6 +120,7 @@ interface HandMetrics {
   fingerRatio: number;
   thumbRatio: number;
   symmetryScore: number;
+  lineClarity: number;
 }
 
 interface FaceMetrics {
@@ -721,11 +722,13 @@ export class AppComponent {
   palmRightUrl = '';
   palmResult?: PalmResult;
   palmError = '';
+  palmLoading = false;
   faceGender = '';
   facePhotoFile?: File;
   facePhotoUrl = '';
   faceResult?: FaceResult;
   faceError = '';
+  faceLoading = false;
   fengshuiPhotoFile?: File;
   fengshuiPhotoUrl = '';
   fengshuiSpace = '卧室';
@@ -928,7 +931,7 @@ export class AppComponent {
     this.matchError = '';
   }
 
-  calculatePalm(): void {
+  async calculatePalm(): Promise<void> {
     this.palmError = '';
     if (!this.palmGender) {
       this.palmResult = undefined;
@@ -940,7 +943,10 @@ export class AppComponent {
       this.palmError = '请上传或拍摄左右手清晰照片。';
       return;
     }
-    this.runPalmAnalysis();
+    this.palmLoading = true;
+    this.activeTab = 'output';
+    await this.runPalmAnalysis();
+    this.palmLoading = false;
   }
 
   resetPalm(): void {
@@ -953,7 +959,7 @@ export class AppComponent {
     this.palmError = '';
   }
 
-  calculateFace(): void {
+  async calculateFace(): Promise<void> {
     this.faceError = '';
     if (!this.faceGender) {
       this.faceResult = undefined;
@@ -965,7 +971,10 @@ export class AppComponent {
       this.faceError = '请上传或拍摄清晰正面照片。';
       return;
     }
-    this.runFaceAnalysis();
+    this.faceLoading = true;
+    this.activeTab = 'output';
+    await this.runFaceAnalysis();
+    this.faceLoading = false;
   }
 
   resetFace(): void {
@@ -1180,17 +1189,40 @@ export class AppComponent {
         return;
       }
       const genderLabel = this.getGenderLabel(this.palmGender as Gender);
+      const lineTone =
+        leftMetrics.lineClarity > 0.18
+          ? '掌纹清晰，主线走向明晰。'
+          : leftMetrics.lineClarity < 0.1
+            ? '掌纹偏浅，主线不显，宜以日常积累稳住运势。'
+            : '掌纹适中，主线有势，宜循序渐进。';
       const detailLines = [
         `${genderLabel}手相以掌形比例与指节比例为主断，左右手互为内外之象。`,
         `左手掌指比为${leftMetrics.fingerRatio.toFixed(2)}，右手掌指比为${rightMetrics.fingerRatio.toFixed(
           2
-        )}。`,
+        )}，拇指比为${leftMetrics.thumbRatio.toFixed(2)}。`,
         leftMetrics.fingerRatio > 1.1
-          ? '指长于掌，多主思虑细致，重计划与分析。'
-          : '指掌比例均衡，主稳健务实，重行动落地。',
+          ? '指长于掌，偏重思虑与计划，善于统筹与分析。'
+          : leftMetrics.fingerRatio < 0.95
+            ? '指短于掌，偏重行动与执行，行事果断。'
+            : '指掌比例均衡，主稳健务实，进退有度。',
         leftMetrics.palmRatio > 1.2
-          ? '掌长偏长，主理想与志向较强。'
-          : '掌形偏方，主守成与执行力。',
+          ? '掌长偏长，主理想与志向较强，适合长线布局。'
+          : leftMetrics.palmRatio < 1.05
+            ? '掌形偏方，主守成与稳定，重秩序与规则。'
+            : '掌形平衡，主心性中正，顺势而为。',
+        leftMetrics.thumbRatio > 0.35
+          ? '拇指有力，主意志坚定，抗压能力强。'
+          : '拇指偏柔，主温和圆融，宜以柔克刚。',
+        lineTone,
+        leftMetrics.lineClarity > 0.18
+          ? '感情线清楚，情感表达直接，重视真诚与回应。'
+          : '感情线略浅，情感表达含蓄，宜多沟通。',
+        rightMetrics.fingerRatio > 1.1
+          ? '事业线偏长，事业心较强，适合规划型发展。'
+          : '事业线偏稳，重在稳定积累与长期持续。',
+        leftMetrics.palmRatio > 1.2
+          ? '健康线偏长，需注意劳逸平衡，避免透支。'
+          : '健康线平稳，作息规律则气机稳定。',
         Math.abs(leftMetrics.symmetryScore - rightMetrics.symmetryScore) > 0.15
           ? '左右手差异明显，先天与后天侧重不同，后天运势更为关键。'
           : '左右手协调度高，内外一致，行事较顺。'
@@ -1204,7 +1236,6 @@ export class AppComponent {
         details: detailLines,
         advice: adviceLines
       };
-      this.activeTab = 'output';
     } catch {
       this.palmResult = undefined;
       this.palmError = '手相分析初始化失败，请稍后重试。';
@@ -1221,16 +1252,24 @@ export class AppComponent {
         return;
       }
       const detailLines = [
-        `面部纵横比为${metrics.faceRatio.toFixed(2)}，眼距比例为${metrics.eyeRatio.toFixed(2)}。`,
+        `面部纵横比为${metrics.faceRatio.toFixed(2)}，眼距比例为${metrics.eyeRatio.toFixed(2)}，对称度为${metrics.symmetryScore.toFixed(
+          2
+        )}。`,
         metrics.faceRatio > 1.35
-          ? '面形偏长，主思虑深远，善谋定而后动。'
+          ? '面形偏长，主思虑深远，做事重谋略与耐力。'
           : metrics.faceRatio < 1.15
-            ? '面形偏阔，主执行力强，重实效。'
-            : '面形平衡，主稳健中正。',
+            ? '面形偏阔，主执行力强，重实效与效率。'
+            : '面形平衡，主稳健中正，行事有分寸。',
         metrics.eyeRatio > 0.38
-          ? '眼距偏开，主心胸开阔，重视格局。'
-          : '眼距偏聚，主专注内敛，重视细节。',
-        metrics.symmetryScore > 0.85 ? '对称度良好，多主气质稳定。' : '对称度一般，易受情绪影响。'
+          ? '眼距偏开，主心胸开阔，重视格局与远景。'
+          : metrics.eyeRatio < 0.3
+            ? '眼距偏聚，主专注内敛，重视细节与纪律。'
+            : '眼距适中，主心性平衡。',
+        metrics.symmetryScore > 0.88
+          ? '对称度较高，多主气质稳定、处事平衡。'
+          : metrics.symmetryScore < 0.75
+            ? '对称度偏低，易有阶段性情绪起伏，宜调息养气。'
+            : '对称度良好，气场较稳。'
       ];
       this.faceResult = {
         summary: '面相以三庭五眼为纲，五官协调为吉，偏颇则需调和。',
@@ -1240,7 +1279,6 @@ export class AppComponent {
           '如需更细致判断，可补充近期精神状态与作息情况。'
         ]
       };
-      this.activeTab = 'output';
     } catch {
       this.faceResult = undefined;
       this.faceError = '面相分析初始化失败，请稍后重试。';
@@ -1332,7 +1370,8 @@ export class AppComponent {
         const fingerRatio = fingerAvg / (palmLength || 1);
         const thumbRatio = thumbLen / (palmWidth || 1);
         const symmetryScore = 1 - Math.min(Math.abs(palmRatio - 1.2), 0.4);
-        resolve({ palmRatio, fingerRatio, thumbRatio, symmetryScore });
+        const stats = this.getImageStats(image);
+        resolve({ palmRatio, fingerRatio, thumbRatio, symmetryScore, lineClarity: stats.contrast });
       });
       this.handsModel.send({ image });
     });
@@ -1392,7 +1431,7 @@ export class AppComponent {
     const fingerRatio = this.clamp(0.9 + stats.contrast * 0.6, 0.75, 1.4);
     const thumbRatio = this.clamp(0.28 + stats.brightness * 0.2, 0.2, 0.5);
     const symmetryScore = this.clamp(0.7 + (1 - Math.abs(stats.brightness - 0.5)) * 0.3, 0.6, 0.98);
-    return { palmRatio, fingerRatio, thumbRatio, symmetryScore };
+    return { palmRatio, fingerRatio, thumbRatio, symmetryScore, lineClarity: stats.contrast };
   }
 
   private estimateFaceMetrics(image: HTMLImageElement): FaceMetrics {
