@@ -10,335 +10,861 @@
     <div class="hero-note">以易经八卦演算为灵感，给出趋势与建议。</div>
   </header>
 
-  <div class="layout">
-    <section class="panel form-panel">
-      <h2>输入信息</h2>
-      <form (ngSubmit)="calculate()" #fortuneForm="ngForm">
-        <div class="field">
-          <label for="name">姓名</label>
-          <input id="name" name="name" type="text" required [(ngModel)]="name" />
-        </div>
+  <nav class="function-nav">
+    <button
+      *ngFor="let item of functionMenu"
+      type="button"
+      [class.active]="activeFunction === item.key"
+      (click)="setActiveFunction(item.key)"
+    >
+      <span class="nav-title">{{ item.label }}</span>
+      <span class="nav-hint">{{ item.hint }}</span>
+    </button>
+  </nav>
 
-        <div class="field">
-          <label for="gender">性别</label>
-          <select id="gender" name="gender" required [(ngModel)]="gender">
-            <option value="" disabled>请选择</option>
-            <option *ngFor="let option of genderOptions" [ngValue]="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="birthDate">出生日期</label>
-          <input
-            id="birthDate"
-            name="birthDate"
-            type="date"
-            required
-            [(ngModel)]="birthDate"
-          />
-        </div>
-
-        <div class="field">
-          <label>出生时间</label>
-          <div class="segmented">
-            <label class="segment">
-              <input
-                type="radio"
-                name="timeMode"
-                value="time"
-                [(ngModel)]="timeMode"
-              />
-              具体时间
-            </label>
-            <label class="segment">
-              <input
-                type="radio"
-                name="timeMode"
-                value="shichen"
-                [(ngModel)]="timeMode"
-              />
-              时辰
-            </label>
-          </div>
-        </div>
-
-        <div class="field" *ngIf="timeMode === 'time'">
-          <label for="birthTime">时间 (24小时制)</label>
-          <input
-            id="birthTime"
-            name="birthTime"
-            type="time"
-            required
-            [(ngModel)]="birthTime"
-          />
-        </div>
-
-        <div class="field" *ngIf="timeMode === 'shichen'">
-          <label for="shichen">出生时辰</label>
-          <select id="shichen" name="shichen" [(ngModel)]="shichenIndex">
-            <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
-              {{ item.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="actions">
-          <button class="primary" type="submit">生成卦象</button>
-          <button class="ghost" type="button" (click)="reset()">重置</button>
-        </div>
-      </form>
-
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-
-      <div class="divider"></div>
-
-      <h2>合婚测算</h2>
-      <form (ngSubmit)="calculateMatch()" #matchForm="ngForm">
-        <div class="pair-grid">
-          <div class="pair-column">
-            <h3>男方</h3>
-            <div class="field">
-              <label for="maleName">姓名</label>
-              <input id="maleName" name="maleName" type="text" required [(ngModel)]="maleName" />
-            </div>
-            <div class="field">
-              <label for="maleBirthDate">出生日期</label>
-              <input
-                id="maleBirthDate"
-                name="maleBirthDate"
-                type="date"
-                required
-                [(ngModel)]="maleBirthDate"
-              />
-            </div>
-            <div class="field">
-              <label>出生时间</label>
-              <div class="segmented">
-                <label class="segment">
-                  <input type="radio" name="maleTimeMode" value="time" [(ngModel)]="maleTimeMode" />
-                  具体时间
-                </label>
-                <label class="segment">
-                  <input type="radio" name="maleTimeMode" value="shichen" [(ngModel)]="maleTimeMode" />
-                  时辰
-                </label>
-              </div>
-            </div>
-            <div class="field" *ngIf="maleTimeMode === 'time'">
-              <label for="maleBirthTime">时间 (24小时制)</label>
-              <input
-                id="maleBirthTime"
-                name="maleBirthTime"
-                type="time"
-                required
-                [(ngModel)]="maleBirthTime"
-              />
-            </div>
-            <div class="field" *ngIf="maleTimeMode === 'shichen'">
-              <label for="maleShichen">出生时辰</label>
-              <select id="maleShichen" name="maleShichen" [(ngModel)]="maleShichenIndex">
-                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
-                  {{ item.label }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="pair-column">
-            <h3>女方</h3>
-            <div class="field">
-              <label for="femaleName">姓名</label>
-              <input id="femaleName" name="femaleName" type="text" required [(ngModel)]="femaleName" />
-            </div>
-            <div class="field">
-              <label for="femaleBirthDate">出生日期</label>
-              <input
-                id="femaleBirthDate"
-                name="femaleBirthDate"
-                type="date"
-                required
-                [(ngModel)]="femaleBirthDate"
-              />
-            </div>
-            <div class="field">
-              <label>出生时间</label>
-              <div class="segmented">
-                <label class="segment">
-                  <input type="radio" name="femaleTimeMode" value="time" [(ngModel)]="femaleTimeMode" />
-                  具体时间
-                </label>
-                <label class="segment">
-                  <input type="radio" name="femaleTimeMode" value="shichen" [(ngModel)]="femaleTimeMode" />
-                  时辰
-                </label>
-              </div>
-            </div>
-            <div class="field" *ngIf="femaleTimeMode === 'time'">
-              <label for="femaleBirthTime">时间 (24小时制)</label>
-              <input
-                id="femaleBirthTime"
-                name="femaleBirthTime"
-                type="time"
-                required
-                [(ngModel)]="femaleBirthTime"
-              />
-            </div>
-            <div class="field" *ngIf="femaleTimeMode === 'shichen'">
-              <label for="femaleShichen">出生时辰</label>
-              <select id="femaleShichen" name="femaleShichen" [(ngModel)]="femaleShichenIndex">
-                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
-                  {{ item.label }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="primary" type="submit">合婚测算</button>
-          <button class="ghost" type="button" (click)="resetMatch()">重置</button>
-        </div>
-      </form>
-
-      <p class="error" *ngIf="matchError">{{ matchError }}</p>
-
-      <div class="legend">
-        <div>
-          <span class="legend-line yang"></span>
-          <span>阳爻</span>
-        </div>
-        <div>
-          <span class="legend-line yin"></span>
-          <span>阴爻</span>
-        </div>
-        <div>
-          <span class="legend-line moving"></span>
-          <span>动爻</span>
-        </div>
+  <section class="panel function-panel">
+    <div class="panel-header">
+      <div>
+        <h2>{{ getActiveMenu().label }}</h2>
+        <p>{{ getActiveMenu().hint }}</p>
       </div>
-    </section>
+      <div class="tabs">
+        <button type="button" [class.active]="activeTab === 'input'" (click)="setActiveTab('input')">输入</button>
+        <button type="button" [class.active]="activeTab === 'output'" (click)="setActiveTab('output')">输出</button>
+      </div>
+    </div>
 
-    <section class="panel result-panel" [class.empty]="!result && !matchResult">
-      <ng-container *ngIf="result">
-        <div class="result-header">
-          <div>
-            <h2>命运解读</h2>
-            <p>{{ result.name }} · {{ result.genderLabel }} · {{ result.birthLabel }} · {{ result.timeLabel }}</p>
-          </div>
-          <div class="badge">易经演算</div>
-        </div>
+    <ng-container [ngSwitch]="activeFunction">
+      <ng-container *ngSwitchCase="'fortune'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculate()" #fortuneForm="ngForm">
+            <div class="field">
+              <label for="name">姓名</label>
+              <input id="name" name="name" type="text" required [(ngModel)]="name" />
+            </div>
 
-        <div class="hexagram-block">
-          <div class="hexagram">
-            <h3>本卦</h3>
-            <p class="hexagram-name">
-              {{ result.baseHexagram.symbol }} {{ result.baseHexagram.name }}
-            </p>
-            <div class="lines">
-              <div
-                class="line"
-                *ngFor="let line of result.baseLines"
-                [class.yang]="line.value === 1"
-                [class.moving]="line.lineIndex === result.movingLine"
-              >
-                <span></span>
-                <span></span>
+            <div class="field">
+              <label for="gender">性别</label>
+              <select id="gender" name="gender" required [(ngModel)]="gender">
+                <option value="" disabled>请选择</option>
+                <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="birthDate">出生日期</label>
+              <input id="birthDate" name="birthDate" type="date" required [(ngModel)]="birthDate" />
+            </div>
+
+            <div class="field">
+              <label>出生时间</label>
+              <div class="segmented">
+                <label class="segment">
+                  <input type="radio" name="timeMode" value="time" [(ngModel)]="timeMode" />
+                  具体时间
+                </label>
+                <label class="segment">
+                  <input type="radio" name="timeMode" value="shichen" [(ngModel)]="timeMode" />
+                  时辰
+                </label>
               </div>
             </div>
-            <div class="trigram-info">
+
+            <div class="field" *ngIf="timeMode === 'time'">
+              <label for="birthTime">时间 (24小时制)</label>
+              <input id="birthTime" name="birthTime" type="time" required [(ngModel)]="birthTime" />
+            </div>
+
+            <div class="field" *ngIf="timeMode === 'shichen'">
+              <label for="shichen">出生时辰</label>
+              <select id="shichen" name="shichen" [(ngModel)]="shichenIndex">
+                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">生成卦象</button>
+              <button class="ghost" type="button" (click)="reset()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="result; else fortuneEmpty">
+            <div class="result-header">
               <div>
-                <span>上卦</span>
-                <strong>{{ result.upper.name }}</strong>
-                <small>{{ result.upper.nature }} · {{ result.upper.element }} · {{ result.upper.direction }}</small>
+                <h3>命运解读</h3>
+                <p>{{ result.name }} · {{ result.genderLabel }} · {{ result.birthLabel }} · {{ result.timeLabel }}</p>
               </div>
-              <div>
-                <span>下卦</span>
-                <strong>{{ result.lower.name }}</strong>
-                <small>{{ result.lower.nature }} · {{ result.lower.element }} · {{ result.lower.direction }}</small>
+              <div class="badge">易经演算</div>
+            </div>
+
+            <div class="hexagram-block">
+              <div class="hexagram">
+                <h4>本卦</h4>
+                <p class="hexagram-name">{{ result.baseHexagram.symbol }} {{ result.baseHexagram.name }}</p>
+                <div class="lines">
+                  <div
+                    class="line"
+                    *ngFor="let line of result.baseLines"
+                    [class.yang]="line.value === 1"
+                    [class.moving]="line.lineIndex === result.movingLine"
+                  >
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+                <div class="trigram-info">
+                  <div>
+                    <span>上卦</span>
+                    <strong>{{ result.upper.name }}</strong>
+                    <small>{{ result.upper.nature }} · {{ result.upper.element }} · {{ result.upper.direction }}</small>
+                  </div>
+                  <div>
+                    <span>下卦</span>
+                    <strong>{{ result.lower.name }}</strong>
+                    <small>{{ result.lower.nature }} · {{ result.lower.element }} · {{ result.lower.direction }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hexagram">
+                <h4>变卦</h4>
+                <p class="hexagram-name">{{ result.changedHexagram.symbol }} {{ result.changedHexagram.name }}</p>
+                <div class="lines">
+                  <div class="line" *ngFor="let line of result.changedLines" [class.yang]="line.value === 1">
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+                <div class="trigram-info">
+                  <div>
+                    <span>上卦</span>
+                    <strong>{{ result.changedUpper.name }}</strong>
+                    <small>
+                      {{ result.changedUpper.nature }} · {{ result.changedUpper.element }} ·
+                      {{ result.changedUpper.direction }}
+                    </small>
+                  </div>
+                  <div>
+                    <span>下卦</span>
+                    <strong>{{ result.changedLower.name }}</strong>
+                    <small>
+                      {{ result.changedLower.nature }} · {{ result.changedLower.element }} ·
+                      {{ result.changedLower.direction }}
+                    </small>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="hexagram">
-            <h3>变卦</h3>
-            <p class="hexagram-name">
-              {{ result.changedHexagram.symbol }} {{ result.changedHexagram.name }}
-            </p>
-            <div class="lines">
-              <div
-                class="line"
-                *ngFor="let line of result.changedLines"
-                [class.yang]="line.value === 1"
-              >
-                <span></span>
-                <span></span>
+            <div class="insight">
+              <p class="summary">{{ result.summary }}</p>
+              <p class="balance">{{ result.elementBalance }}</p>
+              <p class="advice">{{ result.advice }}</p>
+              <div class="fate-notes">
+                <h4>命理断语</h4>
+                <p *ngFor="let line of result.fateNotes">{{ line }}</p>
               </div>
             </div>
-            <div class="trigram-info">
-              <div>
-                <span>上卦</span>
-                <strong>{{ result.changedUpper.name }}</strong>
-                <small>{{ result.changedUpper.nature }} · {{ result.changedUpper.element }} · {{ result.changedUpper.direction }}</small>
-              </div>
-              <div>
-                <span>下卦</span>
-                <strong>{{ result.changedLower.name }}</strong>
-                <small>{{ result.changedLower.nature }} · {{ result.changedLower.element }} · {{ result.changedLower.direction }}</small>
+
+            <div class="sections">
+              <div class="section" *ngFor="let section of result.sections">
+                <h4>{{ section.title }}</h4>
+                <p class="section-description">{{ section.description }}</p>
+                <p class="section-advice">{{ section.advice }}</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div class="insight">
-          <p class="summary">{{ result.summary }}</p>
-          <p class="balance">{{ result.elementBalance }}</p>
-          <p class="advice">{{ result.advice }}</p>
-          <div class="fate-notes">
-            <h3>命理断语</h3>
-            <p *ngFor="let line of result.fateNotes">{{ line }}</p>
-          </div>
-        </div>
-
-        <div class="sections">
-          <div class="section" *ngFor="let section of result.sections">
-            <h4>{{ section.title }}</h4>
-            <p class="section-description">{{ section.description }}</p>
-            <p class="section-advice">{{ section.advice }}</p>
-          </div>
-        </div>
+          </ng-container>
+          <ng-template #fortuneEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先填写命理卦象的输入信息。</p>
+            </div>
+          </ng-template>
+        </ng-container>
       </ng-container>
 
-      <div class="match-result" *ngIf="matchResult">
-        <div class="result-header">
-          <div>
-            <h2>合婚结论</h2>
-            <p>{{ matchResult.maleLabel }} · {{ matchResult.femaleLabel }}</p>
-          </div>
-          <div class="badge">卦象合婚</div>
-        </div>
-        <p class="summary">{{ matchResult.summary }}</p>
-        <div class="match-details">
-          <p *ngFor="let line of matchResult.details">{{ line }}</p>
-        </div>
-        <div class="match-advice">
-          <h3>相处建议</h3>
-          <p *ngFor="let line of matchResult.advice">{{ line }}</p>
-        </div>
-      </div>
+      <ng-container *ngSwitchCase="'match'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculateMatch()" #matchForm="ngForm">
+            <div class="pair-grid">
+              <div class="pair-column">
+                <h3>男方</h3>
+                <div class="field">
+                  <label for="maleName">姓名</label>
+                  <input id="maleName" name="maleName" type="text" required [(ngModel)]="maleName" />
+                </div>
+                <div class="field">
+                  <label for="maleBirthDate">出生日期</label>
+                  <input id="maleBirthDate" name="maleBirthDate" type="date" required [(ngModel)]="maleBirthDate" />
+                </div>
+                <div class="field">
+                  <label>出生时间</label>
+                  <div class="segmented">
+                    <label class="segment">
+                      <input type="radio" name="maleTimeMode" value="time" [(ngModel)]="maleTimeMode" />
+                      具体时间
+                    </label>
+                    <label class="segment">
+                      <input type="radio" name="maleTimeMode" value="shichen" [(ngModel)]="maleTimeMode" />
+                      时辰
+                    </label>
+                  </div>
+                </div>
+                <div class="field" *ngIf="maleTimeMode === 'time'">
+                  <label for="maleBirthTime">时间 (24小时制)</label>
+                  <input id="maleBirthTime" name="maleBirthTime" type="time" required [(ngModel)]="maleBirthTime" />
+                </div>
+                <div class="field" *ngIf="maleTimeMode === 'shichen'">
+                  <label for="maleShichen">出生时辰</label>
+                  <select id="maleShichen" name="maleShichen" [(ngModel)]="maleShichenIndex">
+                    <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                      {{ item.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
 
-      <ng-template [ngIf]="!result && !matchResult">
-        <div class="empty-state">
-          <h2>等待你的出生信息</h2>
-          <p>填写出生年月日与时间，即可生成专属卦象。</p>
-          <div class="empty-lines">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </ng-template>
-    </section>
-  </div>
+              <div class="pair-column">
+                <h3>女方</h3>
+                <div class="field">
+                  <label for="femaleName">姓名</label>
+                  <input id="femaleName" name="femaleName" type="text" required [(ngModel)]="femaleName" />
+                </div>
+                <div class="field">
+                  <label for="femaleBirthDate">出生日期</label>
+                  <input
+                    id="femaleBirthDate"
+                    name="femaleBirthDate"
+                    type="date"
+                    required
+                    [(ngModel)]="femaleBirthDate"
+                  />
+                </div>
+                <div class="field">
+                  <label>出生时间</label>
+                  <div class="segmented">
+                    <label class="segment">
+                      <input type="radio" name="femaleTimeMode" value="time" [(ngModel)]="femaleTimeMode" />
+                      具体时间
+                    </label>
+                    <label class="segment">
+                      <input type="radio" name="femaleTimeMode" value="shichen" [(ngModel)]="femaleTimeMode" />
+                      时辰
+                    </label>
+                  </div>
+                </div>
+                <div class="field" *ngIf="femaleTimeMode === 'time'">
+                  <label for="femaleBirthTime">时间 (24小时制)</label>
+                  <input
+                    id="femaleBirthTime"
+                    name="femaleBirthTime"
+                    type="time"
+                    required
+                    [(ngModel)]="femaleBirthTime"
+                  />
+                </div>
+                <div class="field" *ngIf="femaleTimeMode === 'shichen'">
+                  <label for="femaleShichen">出生时辰</label>
+                  <select id="femaleShichen" name="femaleShichen" [(ngModel)]="femaleShichenIndex">
+                    <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                      {{ item.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">合婚测算</button>
+              <button class="ghost" type="button" (click)="resetMatch()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="matchError">{{ matchError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="matchResult; else matchEmpty">
+            <div class="result-header">
+              <div>
+                <h3>合婚结论</h3>
+                <p>{{ matchResult.maleLabel }} · {{ matchResult.femaleLabel }}</p>
+              </div>
+              <div class="badge">卦象合婚</div>
+            </div>
+            <p class="summary">{{ matchResult.summary }}</p>
+            <div class="match-details">
+              <p *ngFor="let line of matchResult.details">{{ line }}</p>
+            </div>
+            <div class="match-advice">
+              <h4>相处建议</h4>
+              <p *ngFor="let line of matchResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #matchEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先填写合婚测算的输入信息。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'palm'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculatePalm()" #palmForm="ngForm">
+            <div class="field">
+              <label for="palmGender">性别</label>
+              <select id="palmGender" name="palmGender" required [(ngModel)]="palmGender">
+                <option value="" disabled>请选择</option>
+                <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="photo-grid">
+              <div class="photo-card">
+                <div class="photo-header">
+                  <h3>左手照片</h3>
+                  <p>掌心朝上，手指自然张开。</p>
+                </div>
+                <div class="photo-preview" *ngIf="palmLeftUrl">
+                  <img [src]="palmLeftUrl" alt="左手照片预览" />
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  (change)="onPalmFileChange($event, 'left')"
+                />
+              </div>
+              <div class="photo-card">
+                <div class="photo-header">
+                  <h3>右手照片</h3>
+                  <p>保持光线均匀，掌纹清晰。</p>
+                </div>
+                <div class="photo-preview" *ngIf="palmRightUrl">
+                  <img [src]="palmRightUrl" alt="右手照片预览" />
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  (change)="onPalmFileChange($event, 'right')"
+                />
+              </div>
+            </div>
+
+            <div class="tips">
+              <p>拍摄时请靠近镜头，保证掌纹清晰可见，可使用手机相机或相册上传。</p>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">生成手相解读</button>
+              <button class="ghost" type="button" (click)="resetPalm()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="palmError">{{ palmError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="palmResult; else palmEmpty">
+            <div class="result-header">
+              <div>
+                <h3>手相解读</h3>
+                <p>依据左右手掌纹与掌形综合判断。</p>
+              </div>
+              <div class="badge">手相学</div>
+            </div>
+            <p class="summary">{{ palmResult.summary }}</p>
+            <div class="match-details">
+              <p *ngFor="let line of palmResult.details">{{ line }}</p>
+            </div>
+            <div class="match-advice">
+              <h4>建议</h4>
+              <p *ngFor="let line of palmResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #palmEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先上传左右手照片并提交。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'face'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculateFace()" #faceForm="ngForm">
+            <div class="field">
+              <label for="faceGender">性别</label>
+              <select id="faceGender" name="faceGender" required [(ngModel)]="faceGender">
+                <option value="" disabled>请选择</option>
+                <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="photo-card">
+              <div class="photo-header">
+                <h3>面部照片</h3>
+                <p>正面清晰，露出双耳，不戴眼镜与饰品。</p>
+              </div>
+              <div class="photo-preview" *ngIf="facePhotoUrl">
+                <img [src]="facePhotoUrl" alt="面部照片预览" />
+              </div>
+              <input type="file" accept="image/*" capture="user" (change)="onFaceFileChange($event)" />
+            </div>
+
+            <div class="field">
+              <label for="faceForehead">额头特征</label>
+              <select id="faceForehead" name="faceForehead" [(ngModel)]="faceForehead">
+                <option value="wide">额广饱满</option>
+                <option value="medium">额形平正</option>
+                <option value="narrow">额窄偏紧</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="faceNose">鼻形特征</label>
+              <select id="faceNose" name="faceNose" [(ngModel)]="faceNose">
+                <option value="prominent">鼻梁挺拔</option>
+                <option value="medium">鼻形适中</option>
+                <option value="soft">鼻势柔和</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="faceChin">下颌特征</label>
+              <select id="faceChin" name="faceChin" [(ngModel)]="faceChin">
+                <option value="full">下庭丰满</option>
+                <option value="medium">下庭平衡</option>
+                <option value="sharp">下庭偏尖</option>
+              </select>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">生成面相解读</button>
+              <button class="ghost" type="button" (click)="resetFace()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="faceError">{{ faceError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="faceResult; else faceEmpty">
+            <div class="result-header">
+              <div>
+                <h3>面相解读</h3>
+                <p>三庭五眼与五官格局并参。</p>
+              </div>
+              <div class="badge">面相学</div>
+            </div>
+            <p class="summary">{{ faceResult.summary }}</p>
+            <div class="match-details">
+              <p *ngFor="let line of faceResult.details">{{ line }}</p>
+            </div>
+            <div class="match-advice">
+              <h4>建议</h4>
+              <p *ngFor="let line of faceResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #faceEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先上传面部照片并提交。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'fengshui'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculateFengshui()" #fengshuiForm="ngForm">
+            <div class="photo-card">
+              <div class="photo-header">
+                <h3>环境照片</h3>
+                <p>拍摄主要空间，保持全景清晰。</p>
+              </div>
+              <div class="photo-preview" *ngIf="fengshuiPhotoUrl">
+                <img [src]="fengshuiPhotoUrl" alt="风水照片预览" />
+              </div>
+              <input type="file" accept="image/*" (change)="onFengshuiFileChange($event)" />
+            </div>
+
+            <div class="field">
+              <label for="fengshuiSpace">空间类型</label>
+              <select id="fengshuiSpace" name="fengshuiSpace" [(ngModel)]="fengshuiSpace">
+                <option>卧室</option>
+                <option>客厅</option>
+                <option>书房</option>
+                <option>办公区</option>
+                <option>商铺</option>
+                <option>其他</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fengshuiDirection">朝向</label>
+              <select id="fengshuiDirection" name="fengshuiDirection" [(ngModel)]="fengshuiDirection">
+                <option *ngFor="let option of ['正东','东南','正南','西南','正西','西北','正北','东北']">{{ option }}</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fengshuiFloor">楼层/位置</label>
+              <input id="fengshuiFloor" name="fengshuiFloor" type="text" [(ngModel)]="fengshuiFloor" />
+            </div>
+
+            <div class="field">
+              <label for="fengshuiRoad">周边道路</label>
+              <select id="fengshuiRoad" name="fengshuiRoad" [(ngModel)]="fengshuiRoad">
+                <option value="unknown">未说明</option>
+                <option value="main">临主干道</option>
+                <option value="alley">临小路</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fengshuiWater">附近水势</label>
+              <select id="fengshuiWater" name="fengshuiWater" [(ngModel)]="fengshuiWater">
+                <option value="unknown">未说明</option>
+                <option value="near">有水势</option>
+                <option value="none">无水势</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fengshuiMountain">背靠山势</label>
+              <select id="fengshuiMountain" name="fengshuiMountain" [(ngModel)]="fengshuiMountain">
+                <option value="unknown">未说明</option>
+                <option value="near">有山势</option>
+                <option value="none">无山势</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fengshuiDescription">环境说明</label>
+              <textarea
+                id="fengshuiDescription"
+                name="fengshuiDescription"
+                rows="4"
+                [(ngModel)]="fengshuiDescription"
+                placeholder="请描述空间布局、采光、门窗位置等。"
+              ></textarea>
+            </div>
+
+            <div class="field">
+              <label for="fengshuiConcern">关注重点</label>
+              <textarea
+                id="fengshuiConcern"
+                name="fengshuiConcern"
+                rows="3"
+                [(ngModel)]="fengshuiConcern"
+                placeholder="例如：睡眠、事业、夫妻关系等。"
+              ></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">生成风水解读</button>
+              <button class="ghost" type="button" (click)="resetFengshui()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="fengshuiError">{{ fengshuiError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="fengshuiResult; else fengshuiEmpty">
+            <div class="result-header">
+              <div>
+                <h3>风水解读</h3>
+                <p>以藏风聚气、动静分区为纲。</p>
+              </div>
+              <div class="badge">风水学</div>
+            </div>
+            <p class="summary">{{ fengshuiResult.summary }}</p>
+            <div class="match-details">
+              <p *ngFor="let line of fengshuiResult.details">{{ line }}</p>
+            </div>
+            <div class="match-advice">
+              <h4>建议</h4>
+              <p *ngFor="let line of fengshuiResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #fengshuiEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先提交风水测算信息。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'naming'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculateNaming()" #namingForm="ngForm">
+            <div class="field">
+              <label for="namingSurname">姓氏</label>
+              <input id="namingSurname" name="namingSurname" type="text" required [(ngModel)]="namingSurname" />
+            </div>
+
+            <div class="field">
+              <label for="namingFather">父亲姓名</label>
+              <input id="namingFather" name="namingFather" type="text" [(ngModel)]="namingFather" />
+            </div>
+
+            <div class="field">
+              <label for="namingMother">母亲姓名</label>
+              <input id="namingMother" name="namingMother" type="text" [(ngModel)]="namingMother" />
+            </div>
+
+            <div class="field">
+              <label for="namingMiddle">偏好中间字</label>
+              <input id="namingMiddle" name="namingMiddle" type="text" maxlength="1" [(ngModel)]="namingMiddle" />
+            </div>
+
+            <div class="field">
+              <label for="namingLength">姓名长度</label>
+              <select id="namingLength" name="namingLength" [(ngModel)]="namingLength">
+                <option value="2">2字姓名</option>
+                <option value="3">3字姓名</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="namingBirthDate">新生儿出生日期</label>
+              <input id="namingBirthDate" name="namingBirthDate" type="date" [(ngModel)]="namingBirthDate" />
+            </div>
+
+            <div class="field">
+              <label>出生时间</label>
+              <div class="segmented">
+                <label class="segment">
+                  <input type="radio" name="namingTimeMode" value="time" [(ngModel)]="namingTimeMode" />
+                  具体时间
+                </label>
+                <label class="segment">
+                  <input type="radio" name="namingTimeMode" value="shichen" [(ngModel)]="namingTimeMode" />
+                  时辰
+                </label>
+              </div>
+            </div>
+
+            <div class="field" *ngIf="namingTimeMode === 'time'">
+              <label for="namingBirthTime">时间 (24小时制)</label>
+              <input id="namingBirthTime" name="namingBirthTime" type="time" [(ngModel)]="namingBirthTime" />
+            </div>
+
+            <div class="field" *ngIf="namingTimeMode === 'shichen'">
+              <label for="namingShichen">出生时辰</label>
+              <select id="namingShichen" name="namingShichen" [(ngModel)]="namingShichenIndex">
+                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">生成取名方案</button>
+              <button class="ghost" type="button" (click)="resetNaming()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="namingError">{{ namingError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="namingResult; else namingEmpty">
+            <div class="result-header">
+              <div>
+                <h3>取名建议</h3>
+                <p>结合姓名学与寓意参考。</p>
+              </div>
+              <div class="badge">姓名学</div>
+            </div>
+            <p class="summary">{{ namingResult.summary }}</p>
+            <div class="name-options">
+              <div class="name-card" *ngFor="let option of namingResult.options">
+                <h4>{{ option.name }}</h4>
+                <p>{{ option.meaning }}</p>
+                <p class="name-reason">{{ option.reason }}</p>
+              </div>
+            </div>
+            <div class="match-advice">
+              <h4>建议</h4>
+              <p *ngFor="let line of namingResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #namingEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先填写取名信息并提交。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'divination'">
+        <ng-container *ngIf="activeTab === 'input'">
+          <form (ngSubmit)="calculateDivination()" #divinationForm="ngForm">
+            <div class="field">
+              <label for="divinationName">姓名</label>
+              <input id="divinationName" name="divinationName" type="text" required [(ngModel)]="divinationName" />
+            </div>
+
+            <div class="field">
+              <label for="divinationGender">性别</label>
+              <select id="divinationGender" name="divinationGender" required [(ngModel)]="divinationGender">
+                <option value="" disabled>请选择</option>
+                <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="divinationBirthDate">出生日期</label>
+              <input
+                id="divinationBirthDate"
+                name="divinationBirthDate"
+                type="date"
+                required
+                [(ngModel)]="divinationBirthDate"
+              />
+            </div>
+
+            <div class="field">
+              <label>出生时间</label>
+              <div class="segmented">
+                <label class="segment">
+                  <input type="radio" name="divinationTimeMode" value="time" [(ngModel)]="divinationTimeMode" />
+                  具体时间
+                </label>
+                <label class="segment">
+                  <input type="radio" name="divinationTimeMode" value="shichen" [(ngModel)]="divinationTimeMode" />
+                  时辰
+                </label>
+              </div>
+            </div>
+
+            <div class="field" *ngIf="divinationTimeMode === 'time'">
+              <label for="divinationBirthTime">时间 (24小时制)</label>
+              <input
+                id="divinationBirthTime"
+                name="divinationBirthTime"
+                type="time"
+                required
+                [(ngModel)]="divinationBirthTime"
+              />
+            </div>
+
+            <div class="field" *ngIf="divinationTimeMode === 'shichen'">
+              <label for="divinationShichen">出生时辰</label>
+              <select id="divinationShichen" name="divinationShichen" [(ngModel)]="divinationShichenIndex">
+                <option *ngFor="let item of shichenOptions" [ngValue]="item.index">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="divinationTopic">所问之事</label>
+              <textarea
+                id="divinationTopic"
+                name="divinationTopic"
+                rows="4"
+                required
+                [(ngModel)]="divinationTopic"
+                placeholder="请描述最重要的关键问题。"
+              ></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">摇卦解象</button>
+              <button class="ghost" type="button" (click)="resetDivination()">重置</button>
+            </div>
+          </form>
+
+          <p class="error" *ngIf="divinationError">{{ divinationError }}</p>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'output'">
+          <ng-container *ngIf="divinationResult; else divinationEmpty">
+            <div class="result-header">
+              <div>
+                <h3>摇卦结果</h3>
+                <p>所问之事：{{ divinationTopic }}</p>
+              </div>
+              <div class="badge">摇卦占卜</div>
+            </div>
+
+            <div class="hexagram-block">
+              <div class="hexagram">
+                <h4>本卦</h4>
+                <p class="hexagram-name">
+                  {{ divinationResult.baseHexagram.symbol }} {{ divinationResult.baseHexagram.name }}
+                </p>
+                <div class="lines">
+                  <div
+                    class="line"
+                    *ngFor="let line of divinationResult.baseLines"
+                    [class.yang]="line.value === 1"
+                    [class.moving]="line.lineIndex === divinationResult.movingLine"
+                  >
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hexagram">
+                <h4>变卦</h4>
+                <p class="hexagram-name">
+                  {{ divinationResult.changedHexagram.symbol }} {{ divinationResult.changedHexagram.name }}
+                </p>
+                <div class="lines">
+                  <div class="line" *ngFor="let line of divinationResult.changedLines" [class.yang]="line.value === 1">
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight">
+              <p class="summary">{{ divinationResult.summary }}</p>
+              <div class="match-details">
+                <p *ngFor="let line of divinationResult.details">{{ line }}</p>
+              </div>
+            </div>
+
+            <div class="match-advice">
+              <h4>建议</h4>
+              <p *ngFor="let line of divinationResult.advice">{{ line }}</p>
+            </div>
+          </ng-container>
+          <ng-template #divinationEmpty>
+            <div class="empty-state">
+              <h3>暂无输出</h3>
+              <p>请先填写摇卦占卜信息并提交。</p>
+            </div>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </section>
 </div>
