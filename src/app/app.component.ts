@@ -746,6 +746,7 @@ export class AppComponent {
   namingMother = '';
   namingMiddle = '';
   namingLength = '3';
+  namingGender = '';
   namingBirthDate = '';
   namingBirthTime = '12:00';
   namingTimeMode: TimeMode = 'time';
@@ -1061,6 +1062,11 @@ export class AppComponent {
       this.namingError = '请输入姓氏。';
       return;
     }
+    if (!this.namingGender) {
+      this.namingResult = undefined;
+      this.namingError = '请选择新生儿性别。';
+      return;
+    }
     const nameLength = Number(this.namingLength);
     if (Number.isNaN(nameLength) || nameLength < 2 || nameLength > 3) {
       this.namingResult = undefined;
@@ -1069,10 +1075,11 @@ export class AppComponent {
     }
     const hasBirthDate = Boolean(this.namingBirthDate);
     const birthNote = hasBirthDate ? '已结合出生时间偏向调和五行。' : '未提供出生时间，偏重寓意与音律。';
-    const options = this.buildNameOptions(nameLength, this.namingMiddle.trim());
+    const genderNote = this.namingGender === 'male' ? '男孩名侧重阳刚与格局。' : '女孩名侧重温润与雅致。';
+    const options = this.buildNameOptions(nameLength, this.namingMiddle.trim(), this.namingGender as Gender);
 
     this.namingResult = {
-      summary: `以${this.namingSurname}姓为本，${birthNote}`,
+      summary: `以${this.namingSurname}姓为本，${birthNote}${genderNote}`,
       options,
       advice: ['建议避免生僻字与生硬搭配，保持朗朗上口。', '可结合家族辈分或父母寄望微调。']
     };
@@ -1085,6 +1092,7 @@ export class AppComponent {
     this.namingMother = '';
     this.namingMiddle = '';
     this.namingLength = '3';
+    this.namingGender = '';
     this.namingBirthDate = '';
     this.namingBirthTime = '12:00';
     this.namingTimeMode = 'time';
@@ -1189,12 +1197,28 @@ export class AppComponent {
         return;
       }
       const genderLabel = this.getGenderLabel(this.palmGender as Gender);
+      const toneSeed = this.getToneSeed(`${this.palmGender}-${leftMetrics.palmRatio}-${rightMetrics.fingerRatio}`);
       const lineTone =
         leftMetrics.lineClarity > 0.18
           ? '掌纹清晰，主线走向明晰。'
           : leftMetrics.lineClarity < 0.1
             ? '掌纹偏浅，主线不显，宜以日常积累稳住运势。'
             : '掌纹适中，主线有势，宜循序渐进。';
+      const relationshipNote =
+        toneSeed % 3 === 0
+          ? '情感表达直白，重视稳定与回应。'
+          : toneSeed % 3 === 1
+            ? '情感偏内敛，重视安全感与信任。'
+            : '情感细腻敏感，宜多沟通确认。';
+      const careerNote =
+        toneSeed % 4 === 0
+          ? '事业倾向稳步累积，适合长线发展。'
+          : toneSeed % 4 === 1
+            ? '事业偏突破型，宜抓住关键节点。'
+            : toneSeed % 4 === 2
+              ? '事业重协作，团队支持尤为关键。'
+              : '事业重专业深耕，口碑为先。';
+      const healthNote = toneSeed % 2 === 0 ? '体能恢复快，但需防过度消耗。' : '体能稳定，但需保持规律节奏。';
       const detailLines = [
         `${genderLabel}手相以掌形比例与指节比例为主断，左右手互为内外之象。`,
         `左手掌指比为${leftMetrics.fingerRatio.toFixed(2)}，右手掌指比为${rightMetrics.fingerRatio.toFixed(
@@ -1215,14 +1239,14 @@ export class AppComponent {
           : '拇指偏柔，主温和圆融，宜以柔克刚。',
         lineTone,
         leftMetrics.lineClarity > 0.18
-          ? '感情线清楚，情感表达直接，重视真诚与回应。'
-          : '感情线略浅，情感表达含蓄，宜多沟通。',
+          ? `感情线清楚，${relationshipNote}`
+          : `感情线略浅，${relationshipNote}`,
         rightMetrics.fingerRatio > 1.1
-          ? '事业线偏长，事业心较强，适合规划型发展。'
-          : '事业线偏稳，重在稳定积累与长期持续。',
+          ? `事业线偏长，${careerNote}`
+          : `事业线偏稳，${careerNote}`,
         leftMetrics.palmRatio > 1.2
-          ? '健康线偏长，需注意劳逸平衡，避免透支。'
-          : '健康线平稳，作息规律则气机稳定。',
+          ? `健康线偏长，${healthNote}`
+          : `健康线平稳，${healthNote}`,
         Math.abs(leftMetrics.symmetryScore - rightMetrics.symmetryScore) > 0.15
           ? '左右手差异明显，先天与后天侧重不同，后天运势更为关键。'
           : '左右手协调度高，内外一致，行事较顺。'
@@ -1271,6 +1295,11 @@ export class AppComponent {
             ? '对称度偏低，易有阶段性情绪起伏，宜调息养气。'
             : '对称度良好，气场较稳。'
       ];
+      const toneSeed = this.getToneSeed(`${this.faceGender}-${metrics.faceRatio}-${metrics.eyeRatio}`);
+      const temperament =
+        toneSeed % 3 === 0 ? '气质偏稳，重视秩序与责任。' : toneSeed % 3 === 1 ? '气质偏敏，重视感受与共鸣。' : '气质偏强，重视效率与结果。';
+      const socialNote = toneSeed % 2 === 0 ? '人际偏内敛，擅长深度关系。' : '人际偏外放，擅长扩展资源。';
+      detailLines.push(temperament, socialNote);
       this.faceResult = {
         summary: '面相以三庭五眼为纲，五官协调为吉，偏颇则需调和。',
         details: detailLines,
@@ -1351,30 +1380,33 @@ export class AppComponent {
     if (!this.handsModel) {
       return this.estimateHandMetrics(image);
     }
-    return new Promise((resolve) => {
-      this.handsModel.onResults((results: any) => {
-        const landmarks = results.multiHandLandmarks?.[0];
-        if (!landmarks) {
-          resolve(this.estimateHandMetrics(image));
-          return;
-        }
-        const palmWidth = this.distance(landmarks[5], landmarks[17]);
-        const palmLength = this.distance(landmarks[0], landmarks[9]);
-        const indexLen = this.distance(landmarks[5], landmarks[8]);
-        const middleLen = this.distance(landmarks[9], landmarks[12]);
-        const ringLen = this.distance(landmarks[13], landmarks[16]);
-        const pinkyLen = this.distance(landmarks[17], landmarks[20]);
-        const thumbLen = this.distance(landmarks[2], landmarks[4]);
-        const fingerAvg = (indexLen + middleLen + ringLen + pinkyLen) / 4;
-        const palmRatio = palmLength / (palmWidth || 1);
-        const fingerRatio = fingerAvg / (palmLength || 1);
-        const thumbRatio = thumbLen / (palmWidth || 1);
-        const symmetryScore = 1 - Math.min(Math.abs(palmRatio - 1.2), 0.4);
-        const stats = this.getImageStats(image);
-        resolve({ palmRatio, fingerRatio, thumbRatio, symmetryScore, lineClarity: stats.contrast });
-      });
-      this.handsModel.send({ image });
-    });
+    return this.withTimeout<HandMetrics>(
+      new Promise((resolve) => {
+        this.handsModel.onResults((results: any) => {
+          const landmarks = results.multiHandLandmarks?.[0];
+          if (!landmarks) {
+            resolve(this.estimateHandMetrics(image));
+            return;
+          }
+          const palmWidth = this.distance(landmarks[5], landmarks[17]);
+          const palmLength = this.distance(landmarks[0], landmarks[9]);
+          const indexLen = this.distance(landmarks[5], landmarks[8]);
+          const middleLen = this.distance(landmarks[9], landmarks[12]);
+          const ringLen = this.distance(landmarks[13], landmarks[16]);
+          const pinkyLen = this.distance(landmarks[17], landmarks[20]);
+          const thumbLen = this.distance(landmarks[2], landmarks[4]);
+          const fingerAvg = (indexLen + middleLen + ringLen + pinkyLen) / 4;
+          const palmRatio = palmLength / (palmWidth || 1);
+          const fingerRatio = fingerAvg / (palmLength || 1);
+          const thumbRatio = thumbLen / (palmWidth || 1);
+          const symmetryScore = 1 - Math.min(Math.abs(palmRatio - 1.2), 0.4);
+          const stats = this.getImageStats(image);
+          resolve({ palmRatio, fingerRatio, thumbRatio, symmetryScore, lineClarity: stats.contrast });
+        });
+        this.handsModel.send({ image });
+      }),
+      () => this.estimateHandMetrics(image)
+    );
   }
 
   private async analyzeFaceImage(url: string): Promise<FaceMetrics | null> {
@@ -1382,34 +1414,37 @@ export class AppComponent {
     if (!this.faceMeshModel) {
       return this.estimateFaceMetrics(image);
     }
-    return new Promise((resolve) => {
-      this.faceMeshModel.onResults((results: any) => {
-        const landmarks = results.multiFaceLandmarks?.[0];
-        if (!landmarks) {
-          resolve(this.estimateFaceMetrics(image));
-          return;
-        }
-        const forehead = landmarks[10];
-        const chin = landmarks[152];
-        const leftCheek = landmarks[234];
-        const rightCheek = landmarks[454];
-        const leftEye = landmarks[33];
-        const rightEye = landmarks[263];
-        const nose = landmarks[1];
-        const faceHeight = this.distance(forehead, chin);
-        const faceWidth = this.distance(leftCheek, rightCheek);
-        const eyeDist = this.distance(leftEye, rightEye);
-        const leftDiff = this.distance(nose, leftCheek);
-        const rightDiff = this.distance(nose, rightCheek);
-        const symmetryScore = 1 - Math.min(Math.abs(leftDiff - rightDiff), 0.4);
-        resolve({
-          faceRatio: faceHeight / (faceWidth || 1),
-          eyeRatio: eyeDist / (faceWidth || 1),
-          symmetryScore
+    return this.withTimeout<FaceMetrics>(
+      new Promise((resolve) => {
+        this.faceMeshModel.onResults((results: any) => {
+          const landmarks = results.multiFaceLandmarks?.[0];
+          if (!landmarks) {
+            resolve(this.estimateFaceMetrics(image));
+            return;
+          }
+          const forehead = landmarks[10];
+          const chin = landmarks[152];
+          const leftCheek = landmarks[234];
+          const rightCheek = landmarks[454];
+          const leftEye = landmarks[33];
+          const rightEye = landmarks[263];
+          const nose = landmarks[1];
+          const faceHeight = this.distance(forehead, chin);
+          const faceWidth = this.distance(leftCheek, rightCheek);
+          const eyeDist = this.distance(leftEye, rightEye);
+          const leftDiff = this.distance(nose, leftCheek);
+          const rightDiff = this.distance(nose, rightCheek);
+          const symmetryScore = 1 - Math.min(Math.abs(leftDiff - rightDiff), 0.4);
+          resolve({
+            faceRatio: faceHeight / (faceWidth || 1),
+            eyeRatio: eyeDist / (faceWidth || 1),
+            symmetryScore
+          });
         });
-      });
-      this.faceMeshModel.send({ image });
-    });
+        this.faceMeshModel.send({ image });
+      }),
+      () => this.estimateFaceMetrics(image)
+    );
   }
 
   private loadImage(url: string): Promise<HTMLImageElement> {
@@ -1423,6 +1458,36 @@ export class AppComponent {
 
   private distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
     return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  private withTimeout<T>(promise: Promise<T>, fallback: () => T, timeoutMs = 1600): Promise<T> {
+    let settled = false;
+    return new Promise((resolve) => {
+      const timer = window.setTimeout(() => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve(fallback());
+      }, timeoutMs);
+      promise
+        .then((value) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          window.clearTimeout(timer);
+          resolve(value);
+        })
+        .catch(() => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          window.clearTimeout(timer);
+          resolve(fallback());
+        });
+    });
   }
 
   private estimateHandMetrics(image: HTMLImageElement): HandMetrics {
@@ -2149,16 +2214,20 @@ export class AppComponent {
     return this.describeCount(relationCount);
   }
 
-  private buildNameOptions(length: number, middle: string): NameOption[] {
+  private buildNameOptions(length: number, middle: string, gender: Gender): NameOption[] {
     const targetLength = length - 1;
     const basePool = NAME_POOL.filter((item) => item.char !== middle);
+    const genderPool = basePool.filter((item) =>
+      gender === 'male' ? !item.tags.includes('warm') && !item.tags.includes('growth') : true
+    );
     const filtered = middle ? basePool : NAME_POOL;
     const picks: NameOption[] = [];
-    const seed = Math.floor(Math.random() * 1000);
-    for (let i = 0; i < filtered.length && picks.length < 5; i += 1) {
-      const index = (seed + i * 7) % filtered.length;
-      const first = filtered[index];
-      const second = filtered[(index + 5) % filtered.length];
+    const seed = this.getToneSeed(`${this.namingSurname}-${gender}-${middle}-${length}`);
+    const source = genderPool.length > 5 ? genderPool : filtered;
+    for (let i = 0; i < source.length && picks.length < 5; i += 1) {
+      const index = (seed + i * 7) % source.length;
+      const first = source[index];
+      const second = source[(index + 5) % source.length];
       let given = '';
       if (targetLength === 1) {
         given = middle || first.char;
@@ -2171,6 +2240,10 @@ export class AppComponent {
       picks.push({ name, meaning, reason });
     }
     return picks;
+  }
+
+  private getToneSeed(seed: string): number {
+    return Array.from(seed).reduce((sum, char) => sum + char.charCodeAt(0), 0);
   }
 
   private mapNameTheme(tags: string[]): string {

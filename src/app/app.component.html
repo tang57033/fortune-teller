@@ -617,6 +617,16 @@
             </div>
 
             <div class="field">
+              <label for="namingGender">新生儿性别</label>
+              <select id="namingGender" name="namingGender" required [(ngModel)]="namingGender">
+                <option value="" disabled>请选择</option>
+                <option *ngFor="let option of genderOptions" [ngValue]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
               <label for="namingLength">姓名长度</label>
               <select id="namingLength" name="namingLength" [(ngModel)]="namingLength">
                 <option value="2">2字姓名</option>
