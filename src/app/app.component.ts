@@ -4,6 +4,15 @@ import { FormsModule } from '@angular/forms';
 
 type TimeMode = 'time' | 'shichen';
 type Gender = 'male' | 'female' | 'other';
+type FunctionKey =
+  | 'fortune'
+  | 'match'
+  | 'palm'
+  | 'face'
+  | 'fengshui'
+  | 'naming'
+  | 'divination';
+type TabKey = 'input' | 'output';
 
 interface Trigram {
   name: string;
@@ -58,6 +67,47 @@ interface FortuneResult {
 interface MatchResult {
   maleLabel: string;
   femaleLabel: string;
+  summary: string;
+  details: string[];
+  advice: string[];
+}
+
+interface PalmResult {
+  summary: string;
+  details: string[];
+  advice: string[];
+}
+
+interface FaceResult {
+  summary: string;
+  details: string[];
+  advice: string[];
+}
+
+interface FengshuiResult {
+  summary: string;
+  details: string[];
+  advice: string[];
+}
+
+interface NameOption {
+  name: string;
+  meaning: string;
+  reason: string;
+}
+
+interface NamingResult {
+  summary: string;
+  options: NameOption[];
+  advice: string[];
+}
+
+interface DivinationResult {
+  baseHexagram: HexagramInfo;
+  changedHexagram: HexagramInfo;
+  movingLine: number;
+  baseLines: LineDisplay[];
+  changedLines: LineDisplay[];
   summary: string;
   details: string[];
   advice: string[];
@@ -481,6 +531,74 @@ const IDENTITY_NOTES = [
   '以%s之名，外缘助力增强，主动沟通更有利。'
 ];
 
+const FUNCTION_MENU = [
+  { key: 'fortune' as FunctionKey, label: '命理卦象', hint: '八卦推演个人命势' },
+  { key: 'match' as FunctionKey, label: '合婚测算', hint: '两人卦象合参' },
+  { key: 'palm' as FunctionKey, label: '看手相', hint: '手相结构与线象' },
+  { key: 'face' as FunctionKey, label: '看面相', hint: '五官气质断语' },
+  { key: 'fengshui' as FunctionKey, label: '看风水', hint: '场域与环境格局' },
+  { key: 'naming' as FunctionKey, label: '新生儿取名', hint: '姓名寓意与气质' },
+  { key: 'divination' as FunctionKey, label: '大事摇卦占卜', hint: '随机摇卦解象' }
+];
+
+const DIRECTION_OPTIONS = [
+  '正东',
+  '东南',
+  '正南',
+  '西南',
+  '正西',
+  '西北',
+  '正北',
+  '东北'
+];
+
+const DIRECTION_ELEMENTS: Record<string, string> = {
+  正东: '木',
+  东南: '木',
+  正南: '火',
+  西南: '土',
+  正西: '金',
+  西北: '金',
+  正北: '水',
+  东北: '土'
+};
+
+const NAME_POOL = [
+  { char: '安', meaning: '平安稳健', tags: ['health', 'steady'] },
+  { char: '宁', meaning: '安宁从容', tags: ['steady'] },
+  { char: '宸', meaning: '乾象高远', tags: ['noble'] },
+  { char: '辰', meaning: '星辰守护', tags: ['fortune'] },
+  { char: '睿', meaning: '聪慧敏锐', tags: ['wisdom'] },
+  { char: '澄', meaning: '清澈明朗', tags: ['mind'] },
+  { char: '煦', meaning: '温暖向阳', tags: ['warm'] },
+  { char: '泽', meaning: '润泽有福', tags: ['fortune'] },
+  { char: '瑾', meaning: '美玉光华', tags: ['noble'] },
+  { char: '熙', meaning: '兴盛光明', tags: ['fortune'] },
+  { char: '彦', meaning: '才德出众', tags: ['talent'] },
+  { char: '恒', meaning: '恒心坚韧', tags: ['steady'] },
+  { char: '朗', meaning: '明朗正气', tags: ['mind'] },
+  { char: '怡', meaning: '和悦安然', tags: ['warm'] },
+  { char: '雅', meaning: '雅正端庄', tags: ['noble'] },
+  { char: '嘉', meaning: '嘉许祥瑞', tags: ['fortune'] },
+  { char: '祺', meaning: '吉庆福气', tags: ['fortune'] },
+  { char: '昕', meaning: '晨光初升', tags: ['hope'] },
+  { char: '昊', meaning: '广阔高远', tags: ['noble'] },
+  { char: '芊', meaning: '草木茂盛', tags: ['growth'] }
+];
+
+const NAME_TAG_THEMES = [
+  { tag: 'health', label: '健康安稳' },
+  { tag: 'fortune', label: '富贵吉顺' },
+  { tag: 'wisdom', label: '聪慧灵动' },
+  { tag: 'steady', label: '沉稳持守' },
+  { tag: 'warm', label: '温润和气' },
+  { tag: 'talent', label: '才华出众' },
+  { tag: 'noble', label: '气质高雅' },
+  { tag: 'hope', label: '前景光明' },
+  { tag: 'growth', label: '生机旺盛' },
+  { tag: 'mind', label: '心性明朗' }
+];
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -489,6 +607,9 @@ const IDENTITY_NOTES = [
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+  activeFunction: FunctionKey = 'fortune';
+  activeTab: TabKey = 'input';
+  functionMenu = FUNCTION_MENU;
   name = '';
   birthDate = '';
   birthTime = '12:00';
@@ -511,6 +632,53 @@ export class AppComponent {
   femaleShichenIndex = 6;
   matchResult?: MatchResult;
   matchError = '';
+  palmGender = '';
+  palmLeftFile?: File;
+  palmRightFile?: File;
+  palmLeftUrl = '';
+  palmRightUrl = '';
+  palmResult?: PalmResult;
+  palmError = '';
+  faceGender = '';
+  facePhotoFile?: File;
+  facePhotoUrl = '';
+  faceForehead = 'medium';
+  faceNose = 'medium';
+  faceChin = 'medium';
+  faceResult?: FaceResult;
+  faceError = '';
+  fengshuiPhotoFile?: File;
+  fengshuiPhotoUrl = '';
+  fengshuiSpace = '卧室';
+  fengshuiDirection = '正南';
+  fengshuiFloor = '';
+  fengshuiRoad = 'unknown';
+  fengshuiWater = 'unknown';
+  fengshuiMountain = 'unknown';
+  fengshuiDescription = '';
+  fengshuiConcern = '';
+  fengshuiResult?: FengshuiResult;
+  fengshuiError = '';
+  namingSurname = '';
+  namingFather = '';
+  namingMother = '';
+  namingMiddle = '';
+  namingLength = '3';
+  namingBirthDate = '';
+  namingBirthTime = '12:00';
+  namingTimeMode: TimeMode = 'time';
+  namingShichenIndex = 6;
+  namingResult?: NamingResult;
+  namingError = '';
+  divinationName = '';
+  divinationGender = '';
+  divinationBirthDate = '';
+  divinationBirthTime = '12:00';
+  divinationTimeMode: TimeMode = 'time';
+  divinationShichenIndex = 6;
+  divinationTopic = '';
+  divinationResult?: DivinationResult;
+  divinationError = '';
 
   calculate(): void {
     this.errorMessage = '';
@@ -546,6 +714,7 @@ export class AppComponent {
       date.day,
       hourIndex
     );
+    this.activeTab = 'output';
   }
 
   calculateMatch(): void {
@@ -586,6 +755,68 @@ export class AppComponent {
       femaleDate.day,
       femaleHourIndex
     );
+    this.activeTab = 'output';
+  }
+
+  setActiveFunction(key: FunctionKey): void {
+    this.activeFunction = key;
+    this.activeTab = 'input';
+  }
+
+  setActiveTab(tab: TabKey): void {
+    this.activeTab = tab;
+  }
+
+  getActiveMenu() {
+    return this.functionMenu.find((item) => item.key === this.activeFunction) ?? this.functionMenu[0];
+  }
+
+  onPalmFileChange(event: Event, side: 'left' | 'right'): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    if (side === 'left') {
+      if (this.palmLeftUrl) {
+        URL.revokeObjectURL(this.palmLeftUrl);
+      }
+      this.palmLeftFile = file;
+      this.palmLeftUrl = url;
+    } else {
+      if (this.palmRightUrl) {
+        URL.revokeObjectURL(this.palmRightUrl);
+      }
+      this.palmRightFile = file;
+      this.palmRightUrl = url;
+    }
+  }
+
+  onFaceFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    if (this.facePhotoUrl) {
+      URL.revokeObjectURL(this.facePhotoUrl);
+    }
+    this.facePhotoFile = file;
+    this.facePhotoUrl = URL.createObjectURL(file);
+  }
+
+  onFengshuiFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    if (this.fengshuiPhotoUrl) {
+      URL.revokeObjectURL(this.fengshuiPhotoUrl);
+    }
+    this.fengshuiPhotoFile = file;
+    this.fengshuiPhotoUrl = URL.createObjectURL(file);
   }
 
   reset(): void {
@@ -612,6 +843,292 @@ export class AppComponent {
     this.femaleShichenIndex = 6;
     this.matchResult = undefined;
     this.matchError = '';
+  }
+
+  calculatePalm(): void {
+    this.palmError = '';
+    if (!this.palmGender) {
+      this.palmResult = undefined;
+      this.palmError = '请选择性别。';
+      return;
+    }
+    if (!this.palmLeftFile || !this.palmRightFile) {
+      this.palmResult = undefined;
+      this.palmError = '请上传或拍摄左右手清晰照片。';
+      return;
+    }
+
+    const genderLabel = this.getGenderLabel(this.palmGender as Gender);
+    const detailLines = [
+      `${genderLabel}手相以掌丘饱满度、纹路清晰度与整体对称性为主断，左右手互为内外之象。`,
+      '左手主先天禀赋与内在性情，右手主后天作为与现实走向。',
+      '掌纹清晰、主线贯通者，多主心志稳定，行事有章。',
+      '若主线断续或杂纹纷乱，多见阶段性压力与情绪波动，需以养气凝神为要。'
+    ];
+    const adviceLines = [
+      '拍摄时保持手掌舒展与光线均匀，避免阴影遮挡纹路。',
+      '如需细断，请补充掌纹特征（生命线、智慧线、感情线）及掌丘高低。'
+    ];
+    this.palmResult = {
+      summary: '手相以纹路为纲、掌形为势，合参左右手可得整体走势。',
+      details: detailLines,
+      advice: adviceLines
+    };
+    this.activeTab = 'output';
+  }
+
+  resetPalm(): void {
+    this.palmGender = '';
+    this.palmLeftFile = undefined;
+    this.palmRightFile = undefined;
+    if (this.palmLeftUrl) {
+      URL.revokeObjectURL(this.palmLeftUrl);
+    }
+    if (this.palmRightUrl) {
+      URL.revokeObjectURL(this.palmRightUrl);
+    }
+    this.palmLeftUrl = '';
+    this.palmRightUrl = '';
+    this.palmResult = undefined;
+    this.palmError = '';
+  }
+
+  calculateFace(): void {
+    this.faceError = '';
+    if (!this.faceGender) {
+      this.faceResult = undefined;
+      this.faceError = '请选择性别。';
+      return;
+    }
+    if (!this.facePhotoFile) {
+      this.faceResult = undefined;
+      this.faceError = '请上传或拍摄清晰正面照片。';
+      return;
+    }
+
+    const foreheadNote =
+      this.faceForehead === 'wide'
+        ? '额广饱满，主思维开阔、见识深远。'
+        : this.faceForehead === 'narrow'
+          ? '额窄而紧，主谨慎务实，偏重执行。'
+          : '额形平正，主稳健理性。';
+    const noseNote =
+      this.faceNose === 'prominent'
+        ? '鼻梁挺拔，主决断力强，财气易聚。'
+        : this.faceNose === 'soft'
+          ? '鼻势柔和，主圆融稳妥，贵在守成。'
+          : '鼻形适中，主进退有度。';
+    const chinNote =
+      this.faceChin === 'full'
+        ? '下庭丰满，主晚运稳厚、家庭根基稳。'
+        : this.faceChin === 'sharp'
+          ? '下庭偏尖，主行动敏捷但宜稳心性。'
+          : '下庭平衡，主顺势而行。';
+
+    this.faceResult = {
+      summary: '面相以三庭五眼为纲，五官协调为吉，偏颇则需调和。',
+      details: [foreheadNote, noseNote, chinNote, '耳廓显露、轮廓分明者，多主家运有靠。'],
+      advice: ['拍摄时正面平视，露出双耳，避免佩戴眼镜与饰品。', '面相需结合气色与神态综合判断。']
+    };
+    this.activeTab = 'output';
+  }
+
+  resetFace(): void {
+    this.faceGender = '';
+    this.facePhotoFile = undefined;
+    if (this.facePhotoUrl) {
+      URL.revokeObjectURL(this.facePhotoUrl);
+    }
+    this.facePhotoUrl = '';
+    this.faceForehead = 'medium';
+    this.faceNose = 'medium';
+    this.faceChin = 'medium';
+    this.faceResult = undefined;
+    this.faceError = '';
+  }
+
+  calculateFengshui(): void {
+    this.fengshuiError = '';
+    if (!this.fengshuiPhotoFile) {
+      this.fengshuiResult = undefined;
+      this.fengshuiError = '请上传清晰环境照片。';
+      return;
+    }
+    if (!this.fengshuiDescription.trim()) {
+      this.fengshuiResult = undefined;
+      this.fengshuiError = '请补充环境说明。';
+      return;
+    }
+
+    const directionElement = DIRECTION_ELEMENTS[this.fengshuiDirection] ?? '土';
+    const roadNote =
+      this.fengshuiRoad === 'main'
+        ? '临主干道，气口旺盛，需以遮挡缓冲冲煞。'
+        : this.fengshuiRoad === 'alley'
+          ? '临小路，气流平缓，宜聚气。'
+          : '道路情况不明，需结合现场判断。';
+    const waterNote =
+      this.fengshuiWater === 'near'
+        ? '近水有财气，宜保持清净通畅。'
+        : this.fengshuiWater === 'none'
+          ? '无明显水势，可用软装引导气流。'
+          : '水势信息不足，建议补充。';
+    const mountainNote =
+      this.fengshuiMountain === 'near'
+        ? '背有山势，主有靠山，稳中求进。'
+        : this.fengshuiMountain === 'none'
+          ? '无靠山，宜以屏风或高柜作依。'
+          : '山势信息不足，建议补充。';
+
+    const details = [
+      `空间类型：${this.fengshuiSpace}，朝向${this.fengshuiDirection}，五行属${directionElement}。`,
+      roadNote,
+      waterNote,
+      mountainNote,
+      `重点关注：${this.fengshuiConcern.trim() || '整体气场与睡卧区稳定性'}。`
+    ];
+    const advice = [
+      '保持通风与光线稳定，动线通畅可聚气。',
+      '避免镜面直冲床位或门窗，宜以柔化为主。',
+      '如需细断，可补充房门与床位的相对位置。'
+    ];
+
+    this.fengshuiResult = {
+      summary: '风水以藏风聚气为本，气场稳定则人心安。',
+      details,
+      advice
+    };
+    this.activeTab = 'output';
+  }
+
+  resetFengshui(): void {
+    this.fengshuiPhotoFile = undefined;
+    if (this.fengshuiPhotoUrl) {
+      URL.revokeObjectURL(this.fengshuiPhotoUrl);
+    }
+    this.fengshuiPhotoUrl = '';
+    this.fengshuiSpace = '卧室';
+    this.fengshuiDirection = '正南';
+    this.fengshuiFloor = '';
+    this.fengshuiRoad = 'unknown';
+    this.fengshuiWater = 'unknown';
+    this.fengshuiMountain = 'unknown';
+    this.fengshuiDescription = '';
+    this.fengshuiConcern = '';
+    this.fengshuiResult = undefined;
+    this.fengshuiError = '';
+  }
+
+  calculateNaming(): void {
+    this.namingError = '';
+    if (!this.namingSurname.trim()) {
+      this.namingResult = undefined;
+      this.namingError = '请输入姓氏。';
+      return;
+    }
+    const nameLength = Number(this.namingLength);
+    if (Number.isNaN(nameLength) || nameLength < 2 || nameLength > 3) {
+      this.namingResult = undefined;
+      this.namingError = '姓名长度需为2或3字。';
+      return;
+    }
+    const hasBirthDate = Boolean(this.namingBirthDate);
+    const birthNote = hasBirthDate ? '已结合出生时间偏向调和五行。' : '未提供出生时间，偏重寓意与音律。';
+    const options = this.buildNameOptions(nameLength, this.namingMiddle.trim());
+
+    this.namingResult = {
+      summary: `以${this.namingSurname}姓为本，${birthNote}`,
+      options,
+      advice: ['建议避免生僻字与生硬搭配，保持朗朗上口。', '可结合家族辈分或父母寄望微调。']
+    };
+    this.activeTab = 'output';
+  }
+
+  resetNaming(): void {
+    this.namingSurname = '';
+    this.namingFather = '';
+    this.namingMother = '';
+    this.namingMiddle = '';
+    this.namingLength = '3';
+    this.namingBirthDate = '';
+    this.namingBirthTime = '12:00';
+    this.namingTimeMode = 'time';
+    this.namingShichenIndex = 6;
+    this.namingResult = undefined;
+    this.namingError = '';
+  }
+
+  calculateDivination(): void {
+    this.divinationError = '';
+    if (!this.divinationName.trim()) {
+      this.divinationResult = undefined;
+      this.divinationError = '请输入姓名。';
+      return;
+    }
+    if (!this.divinationGender) {
+      this.divinationResult = undefined;
+      this.divinationError = '请选择性别。';
+      return;
+    }
+    const date = this.parseDate(this.divinationBirthDate);
+    if (!date) {
+      this.divinationResult = undefined;
+      this.divinationError = '请输入有效的出生日期。';
+      return;
+    }
+    const hourIndex = this.getHourIndex(
+      this.divinationTimeMode,
+      this.divinationBirthTime,
+      this.divinationShichenIndex
+    );
+    if (hourIndex === null) {
+      this.divinationResult = undefined;
+      this.divinationError = '请输入有效的出生时间或选择时辰。';
+      return;
+    }
+    if (!this.divinationTopic.trim()) {
+      this.divinationResult = undefined;
+      this.divinationError = '请填写所问之事。';
+      return;
+    }
+
+    const reading = this.getReading(date.year, date.month, date.day, hourIndex);
+    const baseHexagram = reading.baseHexagram;
+    const changedHexagram = reading.changedHexagram;
+    const movingLine = reading.movingLine;
+    const detailLines = [
+      `本卦${baseHexagram.name}，变卦${changedHexagram.name}，动爻在${LINE_LABELS[movingLine]}。`,
+      '本卦示当前之势，变卦为后续转机，动爻为关键节点。',
+      '问事宜循时而动，先稳基础再求突破。'
+    ];
+    const adviceLines = [
+      '所问之事宜明其核心目标，避免多线并进。',
+      '出现变卦之象时，先小试探再做大决定。'
+    ];
+
+    this.divinationResult = {
+      baseHexagram,
+      changedHexagram,
+      movingLine,
+      baseLines: this.toDisplayLines(reading.baseLinesRaw),
+      changedLines: this.toDisplayLines(reading.changedLinesRaw),
+      summary: `所问「${this.divinationTopic.trim()}」以卦象为凭，主势已定，机变在后。`,
+      details: detailLines,
+      advice: adviceLines
+    };
+    this.activeTab = 'output';
+  }
+
+  resetDivination(): void {
+    this.divinationName = '';
+    this.divinationGender = '';
+    this.divinationBirthDate = '';
+    this.divinationBirthTime = '12:00';
+    this.divinationTimeMode = 'time';
+    this.divinationShichenIndex = 6;
+    this.divinationTopic = '';
+    this.divinationResult = undefined;
+    this.divinationError = '';
   }
 
   private parseDate(dateStr: string): { year: number; month: number; day: number } | null {
@@ -1212,5 +1729,34 @@ export class AppComponent {
   private describeMarriageStar(counts: { wealth: number; official: number }, gender: 'male' | 'female'): string {
     const relationCount = gender === 'female' ? counts.official : counts.wealth;
     return this.describeCount(relationCount);
+  }
+
+  private buildNameOptions(length: number, middle: string): NameOption[] {
+    const targetLength = length - 1;
+    const basePool = NAME_POOL.filter((item) => item.char !== middle);
+    const filtered = middle ? basePool : NAME_POOL;
+    const picks: NameOption[] = [];
+    const seed = Math.floor(Math.random() * 1000);
+    for (let i = 0; i < filtered.length && picks.length < 5; i += 1) {
+      const index = (seed + i * 7) % filtered.length;
+      const first = filtered[index];
+      const second = filtered[(index + 5) % filtered.length];
+      let given = '';
+      if (targetLength === 1) {
+        given = middle || first.char;
+      } else {
+        given = middle ? `${middle}${first.char}` : `${first.char}${second.char}`;
+      }
+      const name = `${this.namingSurname}${given}`;
+      const meaning = `${first.meaning}${targetLength === 2 && !middle ? '，' + second.meaning : ''}`;
+      const reason = `偏重「${this.mapNameTheme(first.tags)}」的寓意，音律顺口。`;
+      picks.push({ name, meaning, reason });
+    }
+    return picks;
+  }
+
+  private mapNameTheme(tags: string[]): string {
+    const matched = NAME_TAG_THEMES.find((item) => tags.includes(item.tag));
+    return matched ? matched.label : '和顺雅正';
   }
 }
