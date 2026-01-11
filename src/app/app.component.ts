@@ -947,7 +947,27 @@ const NAME_POOL: NamePoolItem[] = [
   { char: '骁', meaning: '阳朗挺拔', tags: ['talent'], gender: 'male' },
   { char: '骏', meaning: '阳朗挺拔', tags: ['talent'], gender: 'male' },
   { char: '默', meaning: '阳朗挺拔', tags: ['talent'], gender: 'male' },
-  { char: '鼎', meaning: '阳朗挺拔', tags: ['talent'], gender: 'male' }
+  { char: '鼎', meaning: '阳朗挺拔', tags: ['talent'], gender: 'male' },
+  { char: '宥', meaning: '宽厚包容', tags: ['warm'], gender: 'neutral' },
+  { char: '祐', meaning: '护佑安宁', tags: ['fortune'], gender: 'neutral' },
+  { char: '承', meaning: '承志担当', tags: ['steady'], gender: 'male' },
+  { char: '品', meaning: '品性端正', tags: ['mind'], gender: 'neutral' },
+  { char: '丞', meaning: '佐助有成', tags: ['talent'], gender: 'male' },
+  { char: '彤', meaning: '彤云朝彩', tags: ['warm'], gender: 'female' },
+  { char: '恩', meaning: '恩泽仁厚', tags: ['warm'], gender: 'neutral' },
+  { char: '朋', meaning: '朋和友善', tags: ['warm'], gender: 'neutral' },
+  { char: '友', meaning: '友爱相依', tags: ['warm'], gender: 'neutral' },
+  { char: '腾', meaning: '腾跃进取', tags: ['hope'], gender: 'male' },
+  { char: '捷', meaning: '捷达敏锐', tags: ['talent'], gender: 'male' },
+  { char: '舒', meaning: '舒展从容', tags: ['warm'], gender: 'neutral' },
+  { char: '琦', meaning: '美玉珍贵', tags: ['noble'], gender: 'female' },
+  { char: '誉', meaning: '声誉清朗', tags: ['talent'], gender: 'neutral' },
+  { char: '皎', meaning: '皎洁明朗', tags: ['mind'], gender: 'female' },
+  { char: '观', meaning: '观照澄明', tags: ['mind'], gender: 'neutral' },
+  { char: '幸', meaning: '幸遇吉顺', tags: ['fortune'], gender: 'neutral' },
+  { char: '宝', meaning: '宝贵祥和', tags: ['fortune'], gender: 'neutral' },
+  { char: '贝', meaning: '珍贝安和', tags: ['fortune'], gender: 'neutral' },
+  { char: '永', meaning: '长久稳守', tags: ['steady'], gender: 'neutral' }
 ];
 
 const NAME_TAG_THEMES = [
@@ -2539,11 +2559,17 @@ export class AppComponent {
 
   private buildNameOptions(length: number, middle: string, gender: Gender): NameOption[] {
     const targetLength = length - 1;
-    const basePool = NAME_POOL.filter((item) => item.char !== middle);
+    const tabooChars = this.getParentGivenNameChars();
+    const basePool = NAME_POOL.filter((item) => item.char !== middle && !tabooChars.includes(item.char));
     const genderPool = basePool.filter((item) => this.isNameGenderMatch(item.gender, gender));
-    const filtered = middle ? basePool : NAME_POOL;
+    const filtered = basePool;
     const picks: NameOption[] = [];
-    const seed = this.getToneSeed(`${this.namingSurname}-${gender}-${middle}-${length}`);
+    const dateSeed = this.namingBirthDate || 'no-date';
+    const timeSeed =
+      this.namingTimeMode === 'shichen' ? `shichen-${this.namingShichenIndex}` : `time-${this.namingBirthTime}`;
+    const seed = this.getToneSeed(
+      `${this.namingSurname}-${gender}-${middle}-${length}-${dateSeed}-${timeSeed}-${this.namingFather}-${this.namingMother}`
+    );
     const source = genderPool.length > 5 ? genderPool : filtered;
     for (let i = 0; i < source.length && picks.length < 5; i += 1) {
       const index = (seed + i * 7) % source.length;
@@ -2561,6 +2587,23 @@ export class AppComponent {
       picks.push({ name, meaning, reason });
     }
     return picks;
+  }
+
+  private getParentGivenNameChars(): string[] {
+    const surname = this.namingSurname.trim();
+    const pickGiven = (name: string): string => {
+      const trimmed = name.replace(/\s+/g, '');
+      if (!trimmed) {
+        return '';
+      }
+      if (surname && trimmed.startsWith(surname)) {
+        return trimmed.slice(surname.length);
+      }
+      return trimmed.length > 1 ? trimmed.slice(1) : '';
+    };
+    const fatherGiven = pickGiven(this.namingFather);
+    const motherGiven = pickGiven(this.namingMother);
+    return Array.from(`${fatherGiven}${motherGiven}`);
   }
 
   private isNameGenderMatch(itemGender: NameGender, gender: Gender): boolean {
