@@ -583,7 +583,7 @@ const FUNCTION_MENU = [
   { key: 'fengshui' as FunctionKey, label: '看风水', hint: '场域与环境格局' },
   { key: 'naming' as FunctionKey, label: '新生儿取名', hint: '姓名寓意与气质' },
   { key: 'divination' as FunctionKey, label: '大事摇卦占卜', hint: '随机摇卦解象' },
-  { key: 'astrology' as FunctionKey, label: '占星术', hint: '星盘轨迹解析' }
+  { key: 'astrology' as FunctionKey, label: '星座运程', hint: '星盘轨迹解析' }
 ];
 
 const DIRECTION_OPTIONS = [
@@ -2402,7 +2402,7 @@ export class AppComponent {
     if (counts.child >= 2) {
       notes.push('子孙爻旺，子息缘厚，家道可承。');
     } else if (counts.child === 1) {
-      notes.push('子孙爻见，命中有一子女之缘。');
+      notes.push('子孙爻见，命中有子女之缘。');
     } else {
       notes.push('子孙爻隐，子息缘薄，宜顺势而行。');
     }
@@ -2480,7 +2480,7 @@ export class AppComponent {
       counts.child >= 2
         ? '子孙爻旺，子息缘厚，喜讯可期。'
         : counts.child === 1
-          ? '子孙爻见，命中有一子女缘。'
+          ? '子孙爻见，命中有子女缘。'
           : '子孙爻隐，子息缘薄，顺势而行。';
     const moving =
       movingRelation === '子孙' ? ' 动爻临子孙爻，子女之事有进展。' : '';
